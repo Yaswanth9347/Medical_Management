@@ -1,122 +1,63 @@
-Medical Shop Management System
-A lightweight Medical Shop Management System built using Flask, SQLite, and a clean, modular structure. This system allows users to manage medicines, customers, sales, and reports efficiently through a responsive web interface.
 
-Project Structure
-medical_shop_app/
-│
-├── app.py               # Main Flask application
-├── config.py            # DB configuration
-├── models.py            # SQLite table setup
-├── templates/           # HTML Jinja2 templates
-├── static/              # CSS, JS, images
-├── tests/               # All unit and integration test files
-│   ├── test_medicine.py
-│   ├── test_sales.py
-│   ├── test_customers.py
-│   └── test_reports.py
-├── requirements.txt     # Required packages
-└── README.md            # Project documentation
-⚙️ Requirements
-Install the dependencies before running the app:
+# Medical Shop Management System
 
+## Description
+
+The Medical Shop Management System is a Flask-based web application that allows users to manage the inventory, customers, sales, and generate reports for a medical shop. The application supports adding, editing, and deleting medicines, and integrates with a MySQL database using SQLAlchemy ORM for data management.
+
+## Features
+
+- **Inventory Management**: Add, edit, and delete medicines.
+- **Sales Management**: Basic page for sales data management.
+- **Customer Management**: Manage customer details.
+- **Reports**: Generate reports based on sales and inventory.
+- **Error Handling**: Logging for server errors and robust error handling.
+
+## Tech Stack
+
+- **Backend**: Flask (Python web framework)
+- **Database**: MySQL (via SQLAlchemy ORM) for production or SQLite (via native connection for testing purposes)
+- **Frontend**: HTML, Bootstrap for responsive UI
+- **Logging**: Logs errors to `error.log`
+
+## Installation
+
+### Prerequisites
+
+1. **Python**: Ensure that you have Python 3.x installed.
+2. **MySQL**: Ensure MySQL server is installed and running locally, with a database named `medical_shop_db`.
+
+### Install Dependencies
+
+Clone the repository and install the required Python packages by running the following commands:
+
+```bash
+git clone https://github.com/your-username/medical-shop-management.git
+cd medical-shop-management
 pip install -r requirements.txt
-requirements.txt
+```
 
-flask
-pytest
-flask_sqlalchemy
-🧠 Features
-✅ Medicine Inventory Management
-Add, edit, and delete medicines
+If `requirements.txt` doesn't exist, you can manually install dependencies with the following command:
 
-Track quantity, expiry date, and batch
+```
+pip install Flask Flask-SQLAlchemy mysql-connector-python
+```
 
-✅ Sales Management
-Process sales
+### Database Setup
 
-Update inventory after each sale
+1. **Create the Database**:
+   You need to have a MySQL database named `medical_shop_db`. You can create it via the MySQL command line or MySQL Workbench.
 
-View sales history
+   create a database:
+   ```
+   CREATE DATABASE medical_shop_db;
+   ```
 
-✅ Customer Management
-Add, edit, and delete customer info
+2. **Run the Application**:
+   You can run the application with the following command:
 
-Track their purchase history
+   ```
+   python app.py
+   ```
 
-✅ Reporting
-Generate sales reports by date range
-
-Check inventory status and upcoming expiry
-
-🏗️ Database Setup
-Make sure you run the following inside models.py (or through sqlite3 shell or DB browser) to initialize the database:
-
-import sqlite3
-
-conn = sqlite3.connect('medical.db')
-cursor = conn.cursor()
-
-cursor.execute('''
-CREATE TABLE IF NOT EXISTS medicines (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    name TEXT NOT NULL,
-    batch TEXT NOT NULL,
-    expiry DATE NOT NULL,
-    quantity INTEGER NOT NULL,
-    price REAL NOT NULL
-)
-''')
-
-cursor.execute('''
-CREATE TABLE IF NOT EXISTS customers (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    name TEXT NOT NULL,
-    contact TEXT,
-    email TEXT
-)
-''')
-
-cursor.execute('''
-CREATE TABLE IF NOT EXISTS sales (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    medicine_id INTEGER,
-    customer_id INTEGER,
-    quantity INTEGER,
-    total_price REAL,
-    date TEXT,
-    FOREIGN KEY(medicine_id) REFERENCES medicines(id),
-    FOREIGN KEY(customer_id) REFERENCES customers(id)
-)
-''')
-
-conn.commit()
-conn.close()
-🚀 Running the Application
-Run the Flask application using:
-
-bash
-Copy
-Edit
-python app.py
-It will be hosted at: http://127.0.0.1:5000
-
-🧪 Running Tests
-To run all unit tests:
-
-pytest tests/
-
-🧰 Debugging Tips
-Check logs and traceback in console.
-
-Make sure SQLite tables are created before running the server.
-
-Enable Flask debugger by setting debug=True in app.run().
-
-🌐 Future Improvements
-Role-based authentication
-
-PDF/Excel export for reports
-
-Stock threshold alerts
-
-Switch to MySQL via XAMPP for production
+   This will start the Flask development server on `http://127.0.0.1:5000/`.

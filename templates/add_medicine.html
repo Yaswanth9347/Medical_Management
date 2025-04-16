@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h2>Add Medicine</h2>
+<form method="POST">
+    <div class="form-group">
+        <label for="name">Medicine Name</label>
+        <input type="text" name="name" id="name" class="form-control" required>
+    </div>
+    <div class="form-group">
+        <label for="batch_number">Batch Number</label>
+        <input type="text" name="batch_number" id="batch_number" class="form-control" required>
+    </div>
+    <div class="form-group">
+        <label for="category">Category</label>
+        <input type="text" name="category" id="category" class="form-control" required>
+    </div>
+    <div class="form-group">
+        <label for="gst_percent">GST Percent</label>
+        <input type="number" name="gst_percent" id="gst_percent" class="form-control" step="0.01" required>
+    </div>
+    <div class="form-group">
+        <label for="expiry_date">Expiry Date</label>
+        <input type="date" name="expiry_date" id="expiry_date" class="form-control" required>
+    </div>
+    <div class="form-group">
+        <label for="quantity">Quantity</label>
+        <input type="number" name="quantity" id="quantity" class="form-control" required>
+    </div>
+    <div class="form-group">
+        <label for="price">Price</label>
+        <input type="number" name="price" id="price" class="form-control" step="0.01" required>
+    </div>
+    <button type="submit" class="btn btn-success mt-3">Add Medicine</button>
+</form>
+{% endblock %}

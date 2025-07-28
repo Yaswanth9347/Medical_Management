@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Inventory Report</title>
+    <style>
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        th, td {
+            border: 1px solid black;
+            padding: 8px;
+            text-align: left;
+        }
+    </style>
+</head>
+<body>
+    <h1>Inventory Report</h1>
+    <table>
+        <thead>
+            <tr>
+                <th>Name</th>
+                <th>Batch Number</th>
+                <th>Category</th>
+                <th>Quantity</th>
+                <th>Price</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for medicine in inventory %}
+            <tr>
+                <td>{{ medicine.name }}</td>
+                <td>{{ medicine.batch_number }}</td>
+                <td>{{ medicine.category }}</td>
+                <td>{{ medicine.quantity }}</td>
+                <td>{{ medicine.price }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</body>
+</html>

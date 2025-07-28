@@ -2,5 +2,114 @@
 
 {% block content %}
 <h2>Reports</h2>
-<p>Here you can generate and view reports.</p>
+
+<div class="row">
+    <div class="col-md-12">
+        <h3>Sales Report</h3>
+        <a href="{{ url_for('download_report', report_type='sales') }}" class="btn btn-primary mb-3">Download Sales Report (PDF)</a>
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>Sale ID</th>
+                    <th>Total Amount</th>
+                    <th>GST Amount</th>
+                    <th>Date</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for sale in sales %}
+                <tr>
+                    <td>{{ sale.id }}</td>
+                    <td>{{ sale.total_amount }}</td>
+                    <td>{{ sale.gst_amount }}</td>
+                    <td>{{ sale.created_at.strftime('%Y-%m-%d %H:%M:%S') }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<div class="row mt-4">
+    <div class="col-md-12">
+        <h3>Expiry Report</h3>
+        <a href="{{ url_for('download_report', report_type='expiry') }}" class="btn btn-primary mb-3">Download Expiry Report (PDF)</a>
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Batch Number</th>
+                    <th>Expiry Date</th>
+                    <th>Quantity</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for medicine in expired_medicines %}
+                <tr>
+                    <td>{{ medicine.name }}</td>
+                    <td>{{ medicine.batch_number }}</td>
+                    <td>{{ medicine.expiry_date.strftime('%Y-%m-%d') }}</td>
+                    <td>{{ medicine.quantity }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<div class="row mt-4">
+    <div class="col-md-12">
+        <h3>Inventory Report</h3>
+        <a href="{{ url_for('download_report', report_type='inventory') }}" class="btn btn-primary mb-3">Download Inventory Report (PDF)</a>
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Batch Number</th>
+                    <th>Category</th>
+                    <th>Quantity</th>
+                    <th>Price</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for medicine in inventory %}
+                <tr>
+                    <td>{{ medicine.name }}</td>
+                    <td>{{ medicine.batch_number }}</td>
+                    <td>{{ medicine.category }}</td>
+                    <td>{{ medicine.quantity }}</td>
+                    <td>{{ medicine.price }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<div class="row mt-4">
+    <div class="col-md-12">
+        <h3>GST Report</h3>
+        <a href="{{ url_for('download_report', report_type='gst') }}" class="btn btn-primary mb-3">Download GST Report (PDF)</a>
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>Sale ID</th>
+                    <th>Total Amount</th>
+                    <th>GST Amount</th>
+                    <th>Date</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for sale in sales %}
+                <tr>
+                    <td>{{ sale.id }}</td>
+                    <td>{{ sale.total_amount }}</td>
+                    <td>{{ sale.gst_amount }}</td>
+                    <td>{{ sale.created_at.strftime('%Y-%m-%d %H:%M:%S') }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
 {% endblock %}

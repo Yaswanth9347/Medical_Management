@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Expiry Report</title>
+    <style>
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        th, td {
+            border: 1px solid black;
+            padding: 8px;
+            text-align: left;
+        }
+    </style>
+</head>
+<body>
+    <h1>Expiry Report</h1>
+    <table>
+        <thead>
+            <tr>
+                <th>Name</th>
+                <th>Batch Number</th>
+                <th>Expiry Date</th>
+                <th>Quantity</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for medicine in expired_medicines %}
+            <tr>
+                <td>{{ medicine.name }}</td>
+                <td>{{ medicine.batch_number }}</td>
+                <td>{{ medicine.expiry_date.strftime('%Y-%m-%d') }}</td>
+                <td>{{ medicine.quantity }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</body>
+</html>

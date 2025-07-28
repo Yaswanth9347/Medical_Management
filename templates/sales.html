@@ -2,5 +2,52 @@
 
 {% block content %}
 <h2>Sales Management</h2>
-<p>Here you can manage the sales data.</p>
+
+<div class="row">
+    <div class="col-md-4">
+        <h3>Create New Sale</h3>
+        <form method="POST" action="">
+            {{ form.hidden_tag() }}
+            <div class="form-group">
+                {{ form.medicine.label(class="form-control-label") }}
+                {{ form.medicine(class="form-control") }}
+            </div>
+            <div class="form-group">
+                {{ form.quantity.label(class="form-control-label") }}
+                {{ form.quantity(class="form-control") }}
+            </div>
+            <div class="form-group">
+                {{ form.submit(class="btn btn-primary") }}
+            </div>
+        </form>
+    </div>
+    <div class="col-md-8">
+        <h3>Sales History</h3>
+        <form class="d-flex mb-3">
+            <input class="form-control me-2" type="date" name="start_date">
+            <input class="form-control me-2" type="date" name="end_date">
+            <button class="btn btn-outline-success" type="submit">Filter</button>
+        </form>
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>Sale ID</th>
+                    <th>Total Amount</th>
+                    <th>GST Amount</th>
+                    <th>Date</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for sale in sales %}
+                <tr>
+                    <td>{{ sale.id }}</td>
+                    <td>{{ sale.total_amount }}</td>
+                    <td>{{ sale.gst_amount }}</td>
+                    <td>{{ sale.created_at.strftime('%Y-%m-%d %H:%M:%S') }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
 {% endblock %}

@@ -2,15 +2,76 @@
 
 {% block content %}
 <h2>Dashboard</h2>
+
+<div class="row mb-3">
+    <div class="col-md-4">
+        <label for="start_date">Start Date:</label>
+        <input type="date" id="start_date" name="start_date" class="form-control">
+    </div>
+    <div class="col-md-4">
+        <label for="end_date">End Date:</label>
+        <input type="date" id="end_date" name="end_date" class="form-control">
+    </div>
+</div>
+
 <div class="row">
     <div class="col-md-4">
         <div class="card shadow">
             <div class="card-body">
                 <h5>Total Medicines</h5>
                 <p class="fs-3">{{ medicine_count }}</p>
+                <h5>Total Customers</h5>
+                <p class="fs-3">{{ customer_count }}</p>
             </div>
         </div>
     </div>
-    <!-- Additional dashboard cards for Sales and Customers -->
+    <div class="col-md-4">
+        <div class="card shadow bg-danger text-white">
+            <div class="card-body">
+                <h5>Expired Medicines</h5>
+                <p class="fs-3">{{ expired_medicines|length }}</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card shadow bg-warning text-white">
+            <div class="card-body">
+                <h5>Low Stock Medicines</h5>
+                <p class="fs-3">{{ low_stock_medicines|length }}</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mt-4">
+    <div class="col-md-6">
+        <h4>Expired Medicines</h4>
+        <ul class="list-group">
+            {% for medicine in expired_medicines %}
+                <li class="list-group-item">{{ medicine.name }} (Expired on: {{ medicine.expiry_date.strftime('%Y-%m-%d') }})</li>
+            {% endfor %}
+        </ul>
+    </div>
+    <div class="col-md-6">
+        <h4>Low Stock Medicines</h4>
+        <ul class="list-group">
+            {% for medicine in low_stock_medicines %}
+                <li class="list-group-item">{{ medicine.name }} (Quantity: {{ medicine.quantity }})</li>
+            {% endfor %}
+        </ul>
+    </div>
+</div>
+
+<div class="row mt-4">
+    <div class="col-md-6">
+        <h4>Backup & Restore</h4>
+        <a href="{{ url_for('backup') }}" class="btn btn-primary">Backup Database</a>
+        <form action="{{ url_for('restore') }}" method="post" enctype="multipart/form-data" class="mt-2">
+            <div class="form-group">
+                <input type="file" name="backup_file" class="form-control">
+            </div>
+            <button type="submit" class="btn btn-success mt-2">Restore Database</button>
+        </form>
+    </div>
 </div>
 {% endblock %}

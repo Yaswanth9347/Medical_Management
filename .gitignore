@@ -1,0 +1,54 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+
+# Virtual environment
+venv/
+ENV/
+env/
+
+# Environment variables
+.env
+
+# Editor/IDE settings
+.vscode/
+.idea/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Logs and temporary files
+*.log
+*.tmp
+
+# Database and backups
+*.sqlite3
+*.db
+*.sql
+*.bak
+backup.sql
+
+# Compiled files
+*.egg-info/
+*.egg
+dist/
+build/
+
+# Python packaging
+*.tar.gz
+*.whl
+
+# Flask instance folder (if used for config/data)
+instance/
+
+# WeasyPrint temp PDF files
+*.pdf
+
+# Excel exports
+*.xlsx
+
+# Misc
+error.log

@@ -2,7 +2,19 @@
 
 {% block content %}
 <h2>Medicine Inventory</h2>
-<a href="{{ url_for('add_medicine') }}" class="btn btn-primary mb-3">Add Medicine</a>
+<div class="row mb-3">
+    <div class="col-md-4">
+        <a href="{{ url_for('add_medicine') }}" class="btn btn-primary btn-lg">Add Medicine</a>
+    </div>
+    <div class="col-md-8">
+        <form class="d-flex">
+            <input class="form-control me-2" type="search" placeholder="Search by name" aria-label="Search" name="query">
+            <input class="form-control me-2" type="date" name="start_date">
+            <input class="form-control me-2" type="date" name="end_date">
+            <button class="btn btn-outline-success" type="submit">Search</button>
+        </form>
+    </div>
+</div>
 
 <table class="table table-striped">
     <thead>
@@ -14,19 +26,21 @@
             <th>Expiry Date</th>
             <th>Quantity</th>
             <th>Price</th>
+            <th>Stock Status</th>
             <th>Actions</th>
         </tr>
     </thead>
     <tbody>
         {% for medicine in medicines %}
-        <tr>
+        <tr class="{{ 'table-danger' if medicine.is_expired }}">
             <td>{{ medicine.name }}</td>
             <td>{{ medicine.batch_number }}</td>
             <td>{{ medicine.category }}</td>
             <td>{{ medicine.gst_percent }}</td>
-            <td>{{ medicine.expiry_date }}</td>
+            <td>{{ medicine.expiry_date.strftime('%Y-%m-%d') }}</td>
             <td>{{ medicine.quantity }}</td>
             <td>{{ medicine.price }}</td>
+            <td>{{ medicine.stock_status }}</td>
             <td>
                 <a href="{{ url_for('edit_medicine', id=medicine.id) }}" class="btn btn-warning">Edit</a>
                 <a href="{{ url_for('delete_medicine', id=medicine.id) }}" class="btn btn-danger">Delete</a>
@@ -35,4 +49,5 @@
         {% endfor %}
     </tbody>
 </table>
+<a href="{{ url_for('download_report', report_type='inventory') }}" class="btn btn-success">Export to Excel</a>
 {% endblock %}

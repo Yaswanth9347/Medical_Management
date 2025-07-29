@@ -48,16 +48,22 @@ pip install Flask Flask-SQLAlchemy mysql-connector-python
 1. **Create the Database**:
    You need to have a MySQL database named `medical_shop_db`. You can create it via the MySQL command line or MySQL Workbench.
 
-   create a database:
-   ```
+   ```sql
    CREATE DATABASE medical_shop_db;
    ```
 
-2. **Run the Application**:
-   You can run the application with the following command:
-
+2. **Initialize Database Migrations**:
+   ```bash
+   flask db init
+   flask db migrate
+   flask db upgrade
    ```
+
+3. **Run the Application**:
+   Start the development server with:
+
+   ```bash
    python app.py
    ```
 
-   This will start the Flask development server on `http://127.0.0.1:5000/`.
+   The application will be available at `http://localhost:5000/`.

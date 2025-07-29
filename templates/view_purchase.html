@@ -1,0 +1,54 @@
+{% extends "base.html" %}
+{% block content %}
+    <div class="content-section">
+        <h2>Purchase Details</h2>
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5>Purchase #{{ purchase.id }}</h5>
+                <small class="text-muted">{{ purchase.created_at.strftime('%Y-%m-%d %H:%M') }}</small>
+            </div>
+            <div class="card-body">
+                <div class="row mb-4">
+                    <div class="col-md-6">
+                        <h6>Supplier:</h6>
+                        <p class="mb-0">{{ purchase.supplier.name }}</p>
+                        {% if purchase.supplier.contact_person %}
+                            <p class="mb-0">Contact: {{ purchase.supplier.contact_person }}</p>
+                        {% endif %}
+                    </div>
+                    <div class="col-md-6 text-right">
+                        <h6>Total Amount:</h6>
+                        <p class="h4">₹{{ "%.2f"|format(purchase.total_amount) }}</p>
+                    </div>
+                </div>
+
+                <h6>Purchased Items:</h6>
+                <div class="table-responsive">
+                    <table class="table table-sm">
+                        <thead class="thead-light">
+                            <tr>
+                                <th>Medicine</th>
+                                <th>Batch</th>
+                                <th>Quantity</th>
+                                <th>Unit Price</th>
+                                <th>Total</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for item in purchase.items %}
+                                <tr>
+                                    <td>{{ item.medicine.name }}</td>
+                                    <td>{{ item.medicine.batch_number }}</td>
+                                    <td>{{ item.quantity }}</td>
+                                    <td>₹{{ "%.2f"|format(item.price_per_unit) }}</td>
+                                    <td>₹{{ "%.2f"|format(item.quantity * item.price_per_unit) }}</td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        <a href="{{ url_for('purchases') }}" class="btn btn-secondary">Back to Purchases</a>
+    </div>
+{% endblock content %}

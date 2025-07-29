@@ -1,5 +1,5 @@
 from flask_wtf import FlaskForm
-from wtforms import StringField, IntegerField, FloatField, DateField, SubmitField, PasswordField, BooleanField, SelectField
+from wtforms import StringField, IntegerField, FloatField, DateField, SubmitField, PasswordField, BooleanField, SelectField, FormField, FieldList
 from wtforms.validators import DataRequired, Length, NumberRange, Email, EqualTo, ValidationError
 from models import User
 
@@ -31,11 +31,23 @@ class LoginForm(FlaskForm):
     remember = BooleanField('Remember Me')
     submit = SubmitField('Login')
 
-class SaleForm(FlaskForm):
-    customer = SelectField('Customer', coerce=int, validators=[DataRequired()])
+class PasswordResetRequestForm(FlaskForm):
+    username = StringField('Username', validators=[DataRequired(), Length(min=2, max=20)])
+    submit = SubmitField('Request Password Reset')
+
+class PasswordResetForm(FlaskForm):
+    password = PasswordField('Password', validators=[DataRequired()])
+    confirm_password = PasswordField('Confirm Password', validators=[DataRequired(), EqualTo('password')])
+    submit = SubmitField('Reset Password')
+
+class SaleItemForm(FlaskForm):
     medicine = SelectField('Medicine', coerce=int, validators=[DataRequired()])
     quantity = IntegerField('Quantity', validators=[DataRequired(), NumberRange(min=1)])
-    submit = SubmitField('Add to Cart')
+
+class SaleForm(FlaskForm):
+    customer = SelectField('Customer', coerce=int, validators=[DataRequired()])
+    items = FieldList(FormField(SaleItemForm), min_entries=1)
+    submit = SubmitField('Create Sale')
 
 class CustomerForm(FlaskForm):
     name = StringField('Customer Name', validators=[DataRequired(), Length(min=2, max=100)])
@@ -43,3 +55,21 @@ class CustomerForm(FlaskForm):
     email = StringField('Email', validators=[Email(), Length(max=100)])
     address = StringField('Address', validators=[Length(max=200)])
     submit = SubmitField('Submit')
+
+class SupplierForm(FlaskForm):
+    name = StringField('Supplier Name', validators=[DataRequired(), Length(min=2, max=100)])
+    contact_person = StringField('Contact Person', validators=[Length(max=100)])
+    phone_number = StringField('Phone Number', validators=[Length(max=20)])
+    email = StringField('Email', validators=[Email(), Length(max=100)])
+    address = StringField('Address', validators=[Length(max=200)])
+    submit = SubmitField('Submit')
+
+class PurchaseItemForm(FlaskForm):
+    medicine = SelectField('Medicine', coerce=int, validators=[DataRequired()])
+    quantity = IntegerField('Quantity', validators=[DataRequired(), NumberRange(min=1)])
+    price_per_unit = FloatField('Price per Unit', validators=[DataRequired(), NumberRange(min=0)])
+
+class PurchaseForm(FlaskForm):
+    supplier = SelectField('Supplier', coerce=int, validators=[DataRequired()])
+    items = FieldList(FormField(PurchaseItemForm), min_entries=1)
+    submit = SubmitField('Create Purchase')

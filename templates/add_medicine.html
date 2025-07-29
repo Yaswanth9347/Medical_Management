@@ -3,6 +3,12 @@
 {% block content %}
 <h2>Add Medicine</h2>
 <form method="POST" novalidate>
+    <!-- Optional: Barcode/QR Code Scanning Placeholder -->
+    <div class="form-group mb-3">
+        <label for="barcode">Scan Barcode/QR Code (optional)</label>
+        <input type="text" id="barcode" name="barcode" class="form-control" placeholder="Scan or enter barcode/QR code">
+        <small class="form-text text-muted">Barcode/QR code scanning requires a compatible device/browser extension.</small>
+    </div>
     {{ form.hidden_tag() }}
     <div class="form-group">
         {{ form.name.label(class="form-control-label") }}

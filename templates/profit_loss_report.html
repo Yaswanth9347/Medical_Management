@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+{% block content %}
+<h2>Profit/Loss Report</h2>
+<table class="table table-bordered">
+    <thead>
+        <tr>
+            <th>Date</th>
+            <th>Total Sales</th>
+            <th>Total Purchases</th>
+            <th>Profit/Loss</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for row in report_rows %}
+        <tr>
+            <td>{{ row['date'] }}</td>
+            <td>{{ row['total_sales'] }}</td>
+            <td>{{ row['total_purchases'] }}</td>
+            <td>{{ row['profit_loss'] }}</td>
+        </tr>
+        {% else %}
+        <tr><td colspan="4">No data available.</td></tr>
+        {% endfor %}
+    </tbody>
+</table>
+<a href="{{ url_for('reports') }}" class="btn btn-secondary">Back to Reports</a>
+{% endblock %}

@@ -8,7 +8,9 @@
     </div>
     <div class="col-md-8">
         <form class="d-flex">
-            <input class="form-control me-2" type="search" placeholder="Search by name" aria-label="Search" name="query">
+            <input class="form-control me-2" type="search" placeholder="Search by name" aria-label="Search" name="query" value="{{ query or '' }}">
+            <input class="form-control me-2" type="text" placeholder="Category" name="category" value="{{ category or '' }}">
+            <input class="form-control me-2" type="text" placeholder="Batch Number" name="batch_number" value="{{ batch_number or '' }}">
             <input class="form-control me-2" type="date" name="start_date">
             <input class="form-control me-2" type="date" name="end_date">
             <button class="btn btn-outline-success" type="submit">Search</button>

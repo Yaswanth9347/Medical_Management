@@ -29,7 +29,7 @@
                     <p><strong>Date:</strong> {{ sale.created_at.strftime('%d-%m-%Y %H:%M') }}</p>
                 </div>
                 <div class="col-6 text-right">
-                    <p><strong>Customer:</strong> {{ sale.customer.name }}</p>
+                    <p><strong>Customer:</strong> {{ sale.customer.name if sale.customer else 'Anonymous Customer' }}</p>
                     <p><strong>Phone:</strong> {{ sale.customer.phone_number }}</p>
                 </div>
             </div>
@@ -45,12 +45,14 @@
                 </tr>
             </thead>
             <tbody>
+                {% for item in sale.items %}
                 <tr>
-                    <td>{{ sale.medicine.name }}</td>
-                    <td>{{ sale.quantity }}</td>
-                    <td>₹{{ "%.2f"|format(sale.medicine.price) }}</td>
-                    <td>₹{{ "%.2f"|format(sale.total_amount) }}</td>
+                    <td>{{ item.medicine.name }}</td>
+                    <td>{{ item.quantity }}</td>
+                    <td>₹{{ "%.2f"|format(item.price_per_unit) }}</td>
+                    <td>₹{{ "%.2f"|format(item.quantity * item.price_per_unit) }}</td>
                 </tr>
+                {% endfor %}
             </tbody>
         </table>
 
@@ -58,7 +60,7 @@
             <div class="col-8"></div>
             <div class="col-4">
                 <p>Subtotal: ₹{{ "%.2f"|format(sale.total_amount) }}</p>
-                <p>GST ({{ sale.medicine.gst_percent }}%): ₹{{ "%.2f"|format(sale.gst_amount) }}</p>
+                <p>GST: ₹{{ "%.2f"|format(sale.gst_amount) }}</p>
                 <h4>Grand Total: ₹{{ "%.2f"|format(sale.total_amount + sale.gst_amount) }}</h4>
             </div>
         </div>

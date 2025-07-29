@@ -3,16 +3,17 @@
 {% block content %}
 <h2>Dashboard</h2>
 
-<div class="row mb-3">
-    <div class="col-md-4">
-        <label for="start_date">Start Date:</label>
-        <input type="date" id="start_date" name="start_date" class="form-control">
-    </div>
-    <div class="col-md-4">
-        <label for="end_date">End Date:</label>
-        <input type="date" id="end_date" name="end_date" class="form-control">
-    </div>
+<!-- Enhanced Notifications -->
+{% if expired_medicines|length > 0 %}
+<div class="alert alert-danger" role="alert">
+    <strong>Alert:</strong> There are {{ expired_medicines|length }} expired medicines! Please review immediately.
 </div>
+{% endif %}
+{% if low_stock_medicines|length > 0 %}
+<div class="alert alert-warning" role="alert">
+    <strong>Warning:</strong> {{ low_stock_medicines|length }} medicines are low in stock. Consider restocking soon.
+</div>
+{% endif %}
 
 <div class="row">
     <div class="col-md-4">
@@ -64,6 +65,10 @@
 
 <div class="row mt-4">
     <div class="col-md-6">
+        <h4>Sales (Last 7 Days)</h4>
+        <canvas id="salesChart" height="120"></canvas>
+    </div>
+    <div class="col-md-6">
         <h4>Backup & Restore</h4>
         <a href="{{ url_for('backup') }}" class="btn btn-primary">Backup Database</a>
         <form action="{{ url_for('restore') }}" method="post" enctype="multipart/form-data" class="mt-2">
@@ -74,4 +79,31 @@
         </form>
     </div>
 </div>
+
+<script>
+// Data for the last 7 days (from backend)
+const salesLabels = {{ sales_labels|tojson }};
+const salesData = {{ sales_data|tojson }};
+const ctx = document.getElementById('salesChart').getContext('2d');
+new Chart(ctx, {
+    type: 'bar',
+    data: {
+        labels: salesLabels,
+        datasets: [{
+            label: 'Sales',
+            data: salesData,
+            backgroundColor: 'rgba(54, 162, 235, 0.7)'
+        }]
+    },
+    options: {
+        responsive: true,
+        plugins: {
+            legend: { display: false }
+        },
+        scales: {
+            y: { beginAtZero: true }
+        }
+    }
+});
+</script>
 {% endblock %}

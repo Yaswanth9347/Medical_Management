@@ -30,6 +30,7 @@ Thumbs.db
 *.sql
 *.bak
 backup.sql
+migrations/versions/
 
 # Compiled files
 *.egg-info/

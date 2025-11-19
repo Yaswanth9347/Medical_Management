@@ -10,17 +10,22 @@ ENV FLASK_ENV=production
 # Set work directory
 WORKDIR /app
 
-# Install system dependencies (fixed package names for compatibility)
+# Install system dependencies (required for WeasyPrint and PDF generation)
 RUN apt-get update \
     && apt-get install -y --no-install-recommends \
         build-essential \
         libpango-1.0-0 \
         libpangoft2-1.0-0 \
-        libfontconfig1 \
-        libcairo2 \
+        libpangocairo-1.0-0 \
         libgdk-pixbuf-xlib-2.0-0 \
         libffi-dev \
         shared-mime-info \
+        libcairo2 \
+        libcairo-gobject2 \
+        libjpeg62-turbo-dev \
+        libpng-dev \
+        libfreetype6-dev \
+        fontconfig \
         curl \
     && rm -rf /var/lib/apt/lists/*
 
@@ -44,10 +49,11 @@ USER appuser
 
 # Expose port
 EXPOSE 5000
+ENV PORT=5000
 
 # Health check
 HEALTHCHECK --interval=30s --timeout=30s --start-period=5s --retries=3 \
-    CMD curl -f http://localhost:5000/ || exit 1
+    CMD curl -f http://localhost:$PORT/ || exit 1
 
 # Run the application with gunicorn
-CMD ["gunicorn", "--bind", "0.0.0.0:5000", "--workers", "4", "--timeout", "120", "wsgi:app"]
+CMD gunicorn --bind 0.0.0.0:$PORT --workers 4 --timeout 120 wsgi:application

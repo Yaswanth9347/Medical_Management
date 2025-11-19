@@ -16,7 +16,15 @@ from flask_migrate import Migrate
 from flask_login import LoginManager, login_user, logout_user, login_required, current_user
 from werkzeug.security import generate_password_hash, check_password_hash
 from werkzeug.utils import secure_filename
-from weasyprint import HTML
+
+# Optional PDF generation (WeasyPrint may not be available in all deployments)
+try:
+    from weasyprint import HTML
+    PDF_GENERATION_AVAILABLE = True
+except ImportError:
+    PDF_GENERATION_AVAILABLE = False
+    print("Warning: WeasyPrint not available. PDF generation disabled.")
+
 from sqlalchemy import func, or_
 from flask import send_file
 
@@ -1336,6 +1344,11 @@ def generate_bill(sale_id):
     sale = db.session.get(Sale, sale_id)
     if not sale:
         abort(404)
+    
+    if not PDF_GENERATION_AVAILABLE:
+        flash('PDF generation is not available in this deployment.', 'warning')
+        return redirect(url_for('view_sale', sale_id=sale_id))
+        
     html = render_template('reports/sale_bill.html', sale=sale)
     
     pdf = HTML(string=html).write_pdf()

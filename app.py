@@ -1672,11 +1672,8 @@ def internal_error(error):
 if __name__ == '__main__':
     with app.app_context():
         create_db()
-    port = 5000
-    if len(sys.argv) > 1:
-        try:
-            port = int(sys.argv[1])
-        except ValueError:
-            pass
-    print(f"\n App running at: http://localhost:{port}/\n")
-    app.run(debug=True, port=port)
+    
+    # Railway deployment configuration - MUST use Railway's PORT
+    port = int(os.environ.get("PORT", 8080))
+    print(f"\n🚀 App starting on port: {port}\n")
+    app.run(host="0.0.0.0", port=port, debug=False)

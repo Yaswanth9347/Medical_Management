@@ -48,12 +48,11 @@ RUN useradd --create-home --shell /bin/bash appuser \
 USER appuser
 
 # Expose port
-EXPOSE 5000
-ENV PORT=5000
+EXPOSE 8080
 
 # Health check
 HEALTHCHECK --interval=30s --timeout=30s --start-period=5s --retries=3 \
-    CMD curl -f http://localhost:$PORT/ || exit 1
+    CMD curl -f http://localhost:${PORT:-8080}/ || exit 1
 
 # Run the application with gunicorn
-CMD gunicorn --bind 0.0.0.0:$PORT --workers 4 --timeout 120 wsgi:application
+CMD ["sh", "-c", "gunicorn --bind 0.0.0.0:${PORT:-8080} --workers 4 --timeout 120 wsgi:application"]

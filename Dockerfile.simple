@@ -10,7 +10,7 @@ ENV FLASK_ENV=production
 # Set work directory
 WORKDIR /app
 
-# Install minimal system dependencies (no WeasyPrint dependencies)
+# Install minimal system dependencies
 RUN apt-get update \
     && apt-get install -y --no-install-recommends \
         gcc \
@@ -18,7 +18,7 @@ RUN apt-get update \
         curl \
     && rm -rf /var/lib/apt/lists/*
 
-# Copy requirements and install minimal dependencies
+# Copy requirements and install dependencies
 COPY requirements.simple.txt requirements.txt
 RUN pip install --no-cache-dir --upgrade pip \
     && pip install --no-cache-dir -r requirements.txt
@@ -34,13 +34,8 @@ RUN useradd --create-home --shell /bin/bash appuser \
     && chown -R appuser:appuser /app
 USER appuser
 
-# Expose port
-EXPOSE 5000
-ENV PORT=5000
+# Expose the port that Railway will assign
+EXPOSE 8080
 
-# Health check
-HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
-    CMD curl -f http://localhost:$PORT/ || exit 1
-
-# Run the application
-CMD gunicorn --bind 0.0.0.0:$PORT --workers 4 --timeout 120 wsgi:application
+# Use shell script to handle PORT variable properly
+CMD ["sh", "-c", "gunicorn --bind 0.0.0.0:${PORT:-8080} --workers 2 --timeout 120 wsgi:application"]

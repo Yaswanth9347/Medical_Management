@@ -1,0 +1,76 @@
+version: '3.8'
+
+services:
+  # Main web application
+  web:
+    build: .
+    container_name: medical-management-web
+    ports:
+      - "5000:5000"
+    environment:
+      - FLASK_ENV=production
+      - DATABASE_URL=sqlite:///data/medical_management.db
+      - SECRET_KEY=your-production-secret-key-here
+    volumes:
+      - ./data:/app/data
+      - ./logs:/app/logs
+      - ./static/uploads:/app/static/uploads
+    depends_on:
+      - db
+    restart: unless-stopped
+    networks:
+      - medical-network
+
+  # Database (PostgreSQL for production)
+  db:
+    image: postgres:13
+    container_name: medical-management-db
+    environment:
+      - POSTGRES_DB=medical_management
+      - POSTGRES_USER=medical_user
+      - POSTGRES_PASSWORD=secure_password_change_me
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./backups:/backups
+    ports:
+      - "5432:5432"
+    restart: unless-stopped
+    networks:
+      - medical-network
+
+  # Redis for caching (optional)
+  redis:
+    image: redis:6-alpine
+    container_name: medical-management-redis
+    ports:
+      - "6379:6379"
+    restart: unless-stopped
+    networks:
+      - medical-network
+
+  # Nginx reverse proxy (optional)
+  nginx:
+    image: nginx:alpine
+    container_name: medical-management-nginx
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./ssl:/etc/ssl:ro
+    depends_on:
+      - web
+    restart: unless-stopped
+    networks:
+      - medical-network
+
+volumes:
+  postgres_data:
+  static_uploads:
+
+networks:
+  medical-network:
+    driver: bridge
+
+# Development override
+# docker-compose -f docker-compose.yml -f docker-compose.dev.yml up

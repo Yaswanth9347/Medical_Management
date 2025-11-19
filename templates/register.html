@@ -1,62 +1,72 @@
 {% extends "base.html" %}
+
 {% block content %}
-    <div class="col-md-6 offset-md-3">
-        <form method="POST" action="">
-            {{ form.hidden_tag() }}
-            <fieldset class="form-group">
-                <legend class="border-bottom mb-4">Join Today</legend>
-                <div class="form-group">
-                    {{ form.username.label(class="form-control-label") }}
-                    {% if form.username.errors %}
-                        {{ form.username(class="form-control form-control-lg is-invalid") }}
-                        <div class="invalid-feedback">
-                            {% for error in form.username.errors %}
-                                <span>{{ error }}</span>
-                            {% endfor %}
-                        </div>
-                    {% else %}
-                        {{ form.username(class="form-control form-control-lg") }}
-                    {% endif %}
-                </div>
-                <div class="form-group">
-                    {{ form.password.label(class="form-control-label") }}
-                    {% if form.password.errors %}
-                        {{ form.password(class="form-control form-control-lg is-invalid") }}
-                        <div class="invalid-feedback">
-                            {% for error in form.password.errors %}
-                                <span>{{ error }}</span>
-                            {% endfor %}
-                        </div>
-                    {% else %}
-                        {{ form.password(class="form-control form-control-lg") }}
-                    {% endif %}
-                </div>
-                <div class="form-group">
-                    {{ form.confirm_password.label(class="form-control-label") }}
-                    {% if form.confirm_password.errors %}
-                        {{ form.confirm_password(class="form-control form-control-lg is-invalid") }}
-                        <div class="invalid-feedback">
-                            {% for error in form.confirm_password.errors %}
-                                <span>{{ error }}</span>
-                            {% endfor %}
-                        </div>
-                    {% else %}
-                        {{ form.confirm_password(class="form-control form-control-lg") }}
-                    {% endif %}
-                </div>
-                <div class="form-group">
-                    {{ form.role.label(class="form-control-label") }}
-                    {{ form.role(class="form-control") }}
-                </div>
-            </fieldset>
-            <div class="form-group">
-                {{ form.submit(class="btn btn-outline-info") }}
-            </div>
-        </form>
-        <div class="border-top pt-3">
-            <small class="text-muted">
-                Already Have An Account? <a class="ml-2" href="{{ url_for('login') }}">Sign In</a>
-            </small>
+<div class="row align-items-start g-5">
+    <div class="col-lg-6">
+        <div class="card-surface h-100">
+            <h1 class="page-title">Create a secure workspace</h1>
+            <p class="page-subtitle">Invite your pharmacy staff, define roles, and collaborate with clarity.</p>
+            <ul class="mt-4 list-unstyled text-muted">
+                <li class="mb-2"><i class="fa-solid fa-check text-success me-2"></i> Role-based permissions keep data safe.</li>
+                <li class="mb-2"><i class="fa-solid fa-check text-success me-2"></i> Built-in audit trails for compliance.</li>
+                <li><i class="fa-solid fa-check text-success me-2"></i> Instant access to dashboards and alerts.</li>
+            </ul>
         </div>
     </div>
-{% endblock content %}
+    <div class="col-lg-5 ms-lg-auto">
+        <div class="form-card">
+            <div class="mb-4">
+                <h3 class="mb-1">Register new account</h3>
+                <p class="text-muted mb-0">Only admins should create new user profiles</p>
+            </div>
+            <form method="POST" novalidate>
+                {{ form.hidden_tag() }}
+                <div class="mb-3">
+                    {{ form.username.label(class="form-label fw-semibold") }}
+                    {% if form.username.errors %}
+                        {{ form.username(class="form-control is-invalid") }}
+                        <div class="invalid-feedback">
+                            {% for error in form.username.errors %}<span>{{ error }}</span>{% endfor %}
+                        </div>
+                    {% else %}
+                        {{ form.username(class="form-control") }}
+                    {% endif %}
+                </div>
+                <div class="mb-3">
+                    {{ form.password.label(class="form-label fw-semibold") }}
+                    {% if form.password.errors %}
+                        {{ form.password(class="form-control is-invalid") }}
+                        <div class="invalid-feedback">
+                            {% for error in form.password.errors %}<span>{{ error }}</span>{% endfor %}
+                        </div>
+                    {% else %}
+                        {{ form.password(class="form-control") }}
+                    {% endif %}
+                </div>
+                <div class="mb-3">
+                    {{ form.confirm_password.label(class="form-label fw-semibold") }}
+                    {% if form.confirm_password.errors %}
+                        {{ form.confirm_password(class="form-control is-invalid") }}
+                        <div class="invalid-feedback">
+                            {% for error in form.confirm_password.errors %}<span>{{ error }}</span>{% endfor %}
+                        </div>
+                    {% else %}
+                        {{ form.confirm_password(class="form-control") }}
+                    {% endif %}
+                </div>
+                <div class="mb-4">
+                    {{ form.role.label(class="form-label fw-semibold") }}
+                    {{ form.role(class="form-select") }}
+                </div>
+                <div class="d-grid gap-2">
+                    {{ form.submit(class="btn btn-primary btn-pill") }}
+                </div>
+            </form>
+            <div class="text-center mt-4 text-muted">
+                Already have an account?
+                <a href="{{ url_for('login') }}" class="text-decoration-none">Sign in</a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

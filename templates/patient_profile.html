@@ -1,0 +1,157 @@
+{% extends "base.html" %}
+{% block content %}
+    <div class="content-section">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2>{{ patient.full_name }} - Patient Profile</h2>
+            <div>
+                <a href="{{ url_for('patients') }}" class="btn btn-secondary">← Back to Patients</a>
+                <a href="{{ url_for('edit_patient', id=patient.id) }}" class="btn btn-warning">Edit Patient</a>
+                <a href="{{ url_for('add_medical_history', patient_id=patient.id) }}" class="btn btn-primary">Add Medical Record</a>
+            </div>
+        </div>
+        
+        <!-- Patient Information Cards -->
+        <div class="row mb-4">
+            <!-- Personal Information -->
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header">
+                        <h5>Personal Information</h5>
+                    </div>
+                    <div class="card-body">
+                        <p><strong>Date of Birth:</strong> {{ patient.date_of_birth.strftime('%Y-%m-%d') if patient.date_of_birth else 'Not specified' }}</p>
+                        <p><strong>Gender:</strong> {{ patient.gender or 'Not specified' }}</p>
+                        <p><strong>Phone:</strong> {{ patient.phone_number or 'Not specified' }}</p>
+                        <p><strong>Email:</strong> {{ patient.email or 'Not specified' }}</p>
+                        <p><strong>Blood Group:</strong> {{ patient.blood_group or 'Not specified' }}</p>
+                        {% if patient.address %}
+                            <p><strong>Address:</strong><br>{{ patient.address }}</p>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Insurance Information -->
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header">
+                        <h5>Insurance Information</h5>
+                    </div>
+                    <div class="card-body">
+                        {% if patient.insurance_provider %}
+                            <p><strong>Provider:</strong> {{ patient.insurance_provider }}</p>
+                            <p><strong>Policy Number:</strong> {{ patient.insurance_policy_number or 'Not specified' }}</p>
+                            <p><strong>Group Number:</strong> {{ patient.insurance_group_number or 'Not specified' }}</p>
+                            <p><strong>Expiry Date:</strong> {{ patient.insurance_expiry_date.strftime('%Y-%m-%d') if patient.insurance_expiry_date else 'Not specified' }}</p>
+                        {% else %}
+                            <p class="text-muted">No insurance information provided</p>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="row mb-4">
+            <!-- Emergency Contact -->
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header">
+                        <h5>Emergency Contact</h5>
+                    </div>
+                    <div class="card-body">
+                        {% if patient.emergency_contact_name %}
+                            <p><strong>Name:</strong> {{ patient.emergency_contact_name }}</p>
+                            <p><strong>Relationship:</strong> {{ patient.emergency_contact_relationship or 'Not specified' }}</p>
+                            <p><strong>Phone:</strong> {{ patient.emergency_contact_phone or 'Not specified' }}</p>
+                            <p><strong>Email:</strong> {{ patient.emergency_contact_email or 'Not specified' }}</p>
+                        {% else %}
+                            <p class="text-muted">No emergency contact information provided</p>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Medical Information -->
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header">
+                        <h5>Medical Information</h5>
+                    </div>
+                    <div class="card-body">
+                        {% if patient.allergies %}
+                            <p><strong>Allergies:</strong><br>{{ patient.allergies }}</p>
+                        {% endif %}
+                        {% if patient.chronic_conditions %}
+                            <p><strong>Chronic Conditions:</strong><br>{{ patient.chronic_conditions }}</p>
+                        {% endif %}
+                        {% if patient.current_medications %}
+                            <p><strong>Current Medications:</strong><br>{{ patient.current_medications }}</p>
+                        {% endif %}
+                        {% if not patient.allergies and not patient.chronic_conditions and not patient.current_medications %}
+                            <p class="text-muted">No medical information provided</p>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Medical History Section -->
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5>Medical History</h5>
+                <a href="{{ url_for('add_medical_history', patient_id=patient.id) }}" class="btn btn-sm btn-primary">Add Record</a>
+            </div>
+            <div class="card-body">
+                {% if medical_history %}
+                    <div class="table-responsive">
+                        <table class="table table-striped">
+                            <thead>
+                                <tr>
+                                    <th>Date</th>
+                                    <th>Chief Complaint</th>
+                                    <th>Diagnosis</th>
+                                    <th>Doctor</th>
+                                    <th>Vital Signs</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for record in medical_history %}
+                                    <tr>
+                                        <td>{{ record.visit_date.strftime('%Y-%m-%d') if record.visit_date else 'Not specified' }}</td>
+                                        <td>{{ record.chief_complaint[:50] + '...' if record.chief_complaint and record.chief_complaint|length > 50 else (record.chief_complaint or '-') }}</td>
+                                        <td>{{ record.diagnosis[:50] + '...' if record.diagnosis and record.diagnosis|length > 50 else (record.diagnosis or '-') }}</td>
+                                        <td>{{ record.doctor_name or '-' }}</td>
+                                        <td>
+                                            {% if record.temperature or record.blood_pressure or record.heart_rate %}
+                                                <small>
+                                                    {% if record.temperature %}Temp: {{ record.temperature }}°F<br>{% endif %}
+                                                    {% if record.blood_pressure %}BP: {{ record.blood_pressure }}<br>{% endif %}
+                                                    {% if record.heart_rate %}HR: {{ record.heart_rate }} bpm{% endif %}
+                                                </small>
+                                            {% else %}
+                                                -
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            <a href="{{ url_for('edit_medical_history', patient_id=patient.id, history_id=record.id) }}" 
+                                               class="btn btn-sm btn-warning">Edit</a>
+                                            <form action="{{ url_for('delete_medical_history', patient_id=patient.id, history_id=record.id) }}" 
+                                                  method="POST" style="display:inline;">
+                                                <button type="submit" class="btn btn-sm btn-danger" 
+                                                        onclick="return confirm('Are you sure?')">Delete</button>
+                                            </form>
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                {% else %}
+                    <p class="text-muted">No medical history records found.</p>
+                    <a href="{{ url_for('add_medical_history', patient_id=patient.id) }}" class="btn btn-primary">Add First Record</a>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+{% endblock content %}

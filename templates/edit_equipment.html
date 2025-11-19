@@ -1,0 +1,205 @@
+{% extends "base.html" %}
+{% block content %}
+    <div class="content-section">
+        <h2>Edit Equipment - {{ equipment.name }}</h2>
+        <a href="{{ url_for('medical_equipment') }}" class="btn btn-secondary mb-3">← Back to Equipment List</a>
+        
+        <form method="POST">
+            {{ form.hidden_tag() }}
+            
+            <!-- Basic Information -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5>Basic Information</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group mb-3">
+                                {{ form.name.label(class="form-label") }}
+                                {{ form.name(class="form-control") }}
+                                {% if form.name.errors %}
+                                    <div class="text-danger">
+                                        {% for error in form.name.errors %}
+                                            <small>{{ error }}</small>
+                                        {% endfor %}
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group mb-3">
+                                {{ form.category.label(class="form-label") }}
+                                {{ form.category(class="form-control") }}
+                                {% if form.category.errors %}
+                                    <div class="text-danger">
+                                        {% for error in form.category.errors %}
+                                            <small>{{ error }}</small>
+                                        {% endfor %}
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div class="form-group mb-3">
+                                {{ form.serial_number.label(class="form-label") }}
+                                {{ form.serial_number(class="form-control") }}
+                                {% if form.serial_number.errors %}
+                                    <div class="text-danger">
+                                        {% for error in form.serial_number.errors %}
+                                            <small>{{ error }}</small>
+                                        {% endfor %}
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-group mb-3">
+                                {{ form.model_number.label(class="form-label") }}
+                                {{ form.model_number(class="form-control") }}
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-group mb-3">
+                                {{ form.manufacturer.label(class="form-label") }}
+                                {{ form.manufacturer(class="form-control") }}
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group mb-3">
+                        {{ form.description.label(class="form-label") }}
+                        {{ form.description(class="form-control", rows="3") }}
+                        <small class="form-text text-muted">Brief description of the equipment</small>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Purchase Information -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5>Purchase Information</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div class="form-group mb-3">
+                                {{ form.purchase_date.label(class="form-label") }}
+                                {{ form.purchase_date(class="form-control") }}
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-group mb-3">
+                                {{ form.purchase_price.label(class="form-label") }}
+                                {{ form.purchase_price(class="form-control", step="0.01") }}
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-group mb-3">
+                                {{ form.warranty_expiry.label(class="form-label") }}
+                                {{ form.warranty_expiry(class="form-control") }}
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group mb-3">
+                        {{ form.supplier_id.label(class="form-label") }}
+                        {{ form.supplier_id(class="form-control") }}
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Status and Location -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5>Status and Location</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group mb-3">
+                                {{ form.status.label(class="form-label") }}
+                                {{ form.status(class="form-control") }}
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group mb-3">
+                                {{ form.location.label(class="form-label") }}
+                                {{ form.location(class="form-control") }}
+                                <small class="form-text text-muted">Room, department, or storage location</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Maintenance Information -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5>Maintenance Information</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div class="form-group mb-3">
+                                {{ form.last_maintenance_date.label(class="form-label") }}
+                                {{ form.last_maintenance_date(class="form-control") }}
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-group mb-3">
+                                {{ form.next_maintenance_date.label(class="form-label") }}
+                                {{ form.next_maintenance_date(class="form-control") }}
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-group mb-3">
+                                {{ form.maintenance_frequency_days.label(class="form-label") }}
+                                {{ form.maintenance_frequency_days(class="form-control") }}
+                                <small class="form-text text-muted">Days between maintenance</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Usage Information -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5>Usage Information</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group mb-3">
+                                {{ form.usage_hours.label(class="form-label") }}
+                                {{ form.usage_hours(class="form-control", step="0.1") }}
+                                <small class="form-text text-muted">Total hours of usage</small>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group mb-3">
+                                {{ form.last_used_date.label(class="form-label") }}
+                                {{ form.last_used_date(class="form-control") }}
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group mb-3">
+                        {{ form.notes.label(class="form-label") }}
+                        {{ form.notes(class="form-control", rows="4") }}
+                        <small class="form-text text-muted">Additional notes or maintenance history</small>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="form-group">
+                {{ form.submit(class="btn btn-primary") }}
+                <a href="{{ url_for('medical_equipment') }}" class="btn btn-secondary">Cancel</a>
+            </div>
+        </form>
+    </div>
+{% endblock content %}

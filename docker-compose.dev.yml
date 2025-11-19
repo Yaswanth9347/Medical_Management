@@ -1,0 +1,32 @@
+version: '3.8'
+
+# Development overrides for docker-compose.yml
+# Usage: docker-compose -f docker-compose.yml -f docker-compose.dev.yml up
+
+services:
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    environment:
+      - FLASK_ENV=development
+      - DATABASE_URL=sqlite:///data/medical_management.db
+      - SECRET_KEY=dev-secret-key-not-for-production
+      - DEBUG=True
+      - SQLALCHEMY_ECHO=True
+    volumes:
+      - .:/app
+      - /app/venv  # Exclude venv from volume mount
+    command: python app.py
+    ports:
+      - "5001:5000"  # Use different port for dev
+
+  # Use SQLite for development instead of PostgreSQL
+  db:
+    image: postgres:13
+    environment:
+      - POSTGRES_DB=medical_management_dev
+      - POSTGRES_USER=dev_user
+      - POSTGRES_PASSWORD=dev_password
+    volumes:
+      - ./dev_data:/var/lib/postgresql/data

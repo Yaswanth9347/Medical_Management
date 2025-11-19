@@ -1,0 +1,139 @@
+{% extends "base.html" %}
+{% block content %}
+    <div class="content-section">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <div>
+                <h2>Medical Equipment</h2>
+                <p class="text-muted">Manage medical equipment inventory and maintenance</p>
+            </div>
+            <div>
+                <a href="{{ url_for('inventory_dashboard') }}" class="btn btn-outline-info">Dashboard</a>
+                <a href="{{ url_for('add_equipment') }}" class="btn btn-primary">Add Equipment</a>
+            </div>
+        </div>
+        
+        <!-- Filters -->
+        <div class="card mb-4">
+            <div class="card-body">
+                <form method="GET" class="row g-3">
+                    <div class="col-md-3">
+                        <label class="form-label">Search</label>
+                        <input type="text" name="search" class="form-control" 
+                               placeholder="Name, Serial, Model..." 
+                               value="{{ search_query or '' }}">
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label">Category</label>
+                        <select name="category" class="form-control">
+                            <option value="">All Categories</option>
+                            {% for cat in categories %}
+                                <option value="{{ cat }}" {{ 'selected' if category_filter == cat }}>{{ cat }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label">Status</label>
+                        <select name="status" class="form-control">
+                            <option value="">All Status</option>
+                            <option value="Active" {{ 'selected' if status_filter == 'Active' }}>Active</option>
+                            <option value="Maintenance" {{ 'selected' if status_filter == 'Maintenance' }}>Maintenance</option>
+                            <option value="Retired" {{ 'selected' if status_filter == 'Retired' }}>Retired</option>
+                            <option value="Damaged" {{ 'selected' if status_filter == 'Damaged' }}>Damaged</option>
+                        </select>
+                    </div>
+                    <div class="col-md-3 d-flex align-items-end">
+                        <button type="submit" class="btn btn-primary me-2">Filter</button>
+                        <a href="{{ url_for('medical_equipment') }}" class="btn btn-secondary">Clear</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+        
+        <!-- Equipment List -->
+        <div class="table-responsive">
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>Equipment</th>
+                        <th>Category</th>
+                        <th>Serial Number</th>
+                        <th>Status</th>
+                        <th>Location</th>
+                        <th>Last Maintenance</th>
+                        <th>Next Maintenance</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in equipment %}
+                        <tr class="{{ 'table-warning' if item.maintenance_due else '' }}">
+                            <td>
+                                <div>
+                                    <strong>{{ item.name }}</strong>
+                                    {% if item.model_number %}
+                                        <br><small class="text-muted">Model: {{ item.model_number }}</small>
+                                    {% endif %}
+                                    {% if item.manufacturer %}
+                                        <br><small class="text-muted">{{ item.manufacturer }}</small>
+                                    {% endif %}
+                                </div>
+                            </td>
+                            <td>{{ item.category }}</td>
+                            <td>{{ item.serial_number }}</td>
+                            <td>
+                                {% if item.status == 'Active' %}
+                                    <span class="badge bg-success">Active</span>
+                                {% elif item.status == 'Maintenance' %}
+                                    <span class="badge bg-warning">Maintenance</span>
+                                {% elif item.status == 'Retired' %}
+                                    <span class="badge bg-secondary">Retired</span>
+                                {% elif item.status == 'Damaged' %}
+                                    <span class="badge bg-danger">Damaged</span>
+                                {% endif %}
+                                
+                                {% if item.maintenance_due %}
+                                    <br><span class="badge bg-warning">Maintenance Due</span>
+                                {% endif %}
+                            </td>
+                            <td>{{ item.location or '-' }}</td>
+                            <td>{{ item.last_maintenance_date.strftime('%Y-%m-%d') if item.last_maintenance_date else '-' }}</td>
+                            <td>
+                                {% if item.next_maintenance_date %}
+                                    {{ item.next_maintenance_date.strftime('%Y-%m-%d') }}
+                                    {% if item.maintenance_due %}
+                                        <br><small class="text-danger">Overdue</small>
+                                    {% elif item.days_to_maintenance and item.days_to_maintenance <= 30 %}
+                                        <br><small class="text-warning">{{ item.days_to_maintenance }} days</small>
+                                    {% endif %}
+                                {% else %}
+                                    -
+                                {% endif %}
+                            </td>
+                            <td>
+                                <div class="btn-group">
+                                    <a href="{{ url_for('edit_equipment', id=item.id) }}" 
+                                       class="btn btn-sm btn-outline-primary">Edit</a>
+                                    <form action="{{ url_for('delete_equipment', id=item.id) }}" method="POST" 
+                                          style="display:inline;">
+                                        <button type="submit" class="btn btn-sm btn-outline-danger" 
+                                                onclick="return confirm('Are you sure?')">Delete</button>
+                                    </form>
+                                </div>
+                            </td>
+                        </tr>
+                    {% else %}
+                        <tr>
+                            <td colspan="8" class="text-center">
+                                {% if search_query or category_filter or status_filter %}
+                                    No equipment found matching the filters.
+                                {% else %}
+                                    No medical equipment registered yet.
+                                {% endif %}
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+{% endblock content %}

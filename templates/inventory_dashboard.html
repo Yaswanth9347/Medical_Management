@@ -1,0 +1,253 @@
+{% extends "base.html" %}
+{% block content %}
+    <div class="content-section">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <div>
+                <h2>Inventory Dashboard</h2>
+                <p class="text-muted">Comprehensive overview of medicines and equipment</p>
+            </div>
+            <div>
+                <a href="{{ url_for('inventory_alerts') }}" class="btn btn-warning">
+                    <i class="fas fa-bell"></i> Alerts
+                </a>
+                <a href="{{ url_for('inventory') }}" class="btn btn-primary">Medicine Inventory</a>
+                <a href="{{ url_for('medical_equipment') }}" class="btn btn-info">Equipment</a>
+            </div>
+        </div>
+        
+        <!-- Summary Cards -->
+        <div class="row mb-4">
+            <!-- Medicine Statistics -->
+            <div class="col-md-3">
+                <div class="card bg-primary text-white">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between">
+                            <div>
+                                <h4>{{ total_medicines }}</h4>
+                                <p class="mb-0">Total Medicines</p>
+                            </div>
+                            <div class="align-self-center">
+                                <i class="fas fa-capsules fa-2x"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-3">
+                <div class="card bg-warning text-white">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between">
+                            <div>
+                                <h4>{{ low_stock_medicines }}</h4>
+                                <p class="mb-0">Low Stock Items</p>
+                            </div>
+                            <div class="align-self-center">
+                                <i class="fas fa-exclamation-triangle fa-2x"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-3">
+                <div class="card bg-danger text-white">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between">
+                            <div>
+                                <h4>{{ expired_medicines }}</h4>
+                                <p class="mb-0">Expired Items</p>
+                            </div>
+                            <div class="align-self-center">
+                                <i class="fas fa-calendar-times fa-2x"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-3">
+                <div class="card bg-info text-white">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between">
+                            <div>
+                                <h4>{{ expiring_soon }}</h4>
+                                <p class="mb-0">Expiring Soon</p>
+                            </div>
+                            <div class="align-self-center">
+                                <i class="fas fa-clock fa-2x"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Equipment Statistics -->
+        <div class="row mb-4">
+            <div class="col-md-3">
+                <div class="card bg-success text-white">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between">
+                            <div>
+                                <h4>{{ total_equipment }}</h4>
+                                <p class="mb-0">Total Equipment</p>
+                            </div>
+                            <div class="align-self-center">
+                                <i class="fas fa-stethoscope fa-2x"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-3">
+                <div class="card bg-secondary text-white">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between">
+                            <div>
+                                <h4>{{ active_equipment }}</h4>
+                                <p class="mb-0">Active Equipment</p>
+                            </div>
+                            <div class="align-self-center">
+                                <i class="fas fa-check-circle fa-2x"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-3">
+                <div class="card bg-warning text-white">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between">
+                            <div>
+                                <h4>{{ equipment_needing_maintenance }}</h4>
+                                <p class="mb-0">Maintenance Due</p>
+                            </div>
+                            <div class="align-self-center">
+                                <i class="fas fa-wrench fa-2x"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-3">
+                <div class="card bg-dark text-white">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between">
+                            <div>
+                                <h4>{{ recent_alerts|length }}</h4>
+                                <p class="mb-0">Active Alerts</p>
+                            </div>
+                            <div class="align-self-center">
+                                <i class="fas fa-bell fa-2x"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Charts and Detailed Views -->
+        <div class="row">
+            <!-- Top Categories by Value -->
+            <div class="col-md-8">
+                <div class="card">
+                    <div class="card-header">
+                        <h5>Top Medicine Categories by Value</h5>
+                    </div>
+                    <div class="card-body">
+                        {% if medicine_categories %}
+                            <div class="table-responsive">
+                                <table class="table table-striped">
+                                    <thead>
+                                        <tr>
+                                            <th>Category</th>
+                                            <th>Items</th>
+                                            <th>Total Value</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for category in medicine_categories %}
+                                            <tr>
+                                                <td>{{ category[0] }}</td>
+                                                <td>{{ category[2] }}</td>
+                                                <td>₹{{ '%.2f'|format(category[1]) }}</td>
+                                            </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        {% else %}
+                            <p class="text-muted">No medicine data available.</p>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Recent Alerts -->
+            <div class="col-md-4">
+                <div class="card">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <h5>Recent Alerts</h5>
+                        <a href="{{ url_for('inventory_alerts') }}" class="btn btn-sm btn-outline-primary">View All</a>
+                    </div>
+                    <div class="card-body">
+                        {% if recent_alerts %}
+                            {% for alert in recent_alerts[:5] %}
+                                <div class="alert alert-{{ 'danger' if alert.severity == 'Critical' else ('warning' if alert.severity == 'High' else 'info') }} alert-dismissible py-2 mb-2">
+                                    <div class="d-flex justify-content-between">
+                                        <div>
+                                            <strong>{{ alert.alert_type.replace('_', ' ').title() }}</strong><br>
+                                            <small>{{ alert.item_name }}</small>
+                                        </div>
+                                        <small>{{ alert.created_at.strftime('%m-%d') }}</small>
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        {% else %}
+                            <p class="text-muted">No active alerts.</p>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Quick Actions -->
+        <div class="row mt-4">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header">
+                        <h5>Quick Actions</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-3">
+                                <a href="{{ url_for('add_medicine') }}" class="btn btn-outline-primary btn-block mb-2 w-100">
+                                    <i class="fas fa-plus"></i> Add Medicine
+                                </a>
+                            </div>
+                            <div class="col-md-3">
+                                <a href="{{ url_for('add_equipment') }}" class="btn btn-outline-info btn-block mb-2 w-100">
+                                    <i class="fas fa-plus"></i> Add Equipment
+                                </a>
+                            </div>
+                            <div class="col-md-3">
+                                <a href="{{ url_for('inventory_alerts') }}" class="btn btn-outline-warning btn-block mb-2 w-100">
+                                    <i class="fas fa-bell"></i> View Alerts
+                                </a>
+                            </div>
+                            <div class="col-md-3">
+                                <a href="{{ url_for('reports') }}" class="btn btn-outline-success btn-block mb-2 w-100">
+                                    <i class="fas fa-chart-bar"></i> Reports
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock content %}

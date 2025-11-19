@@ -1,109 +1,159 @@
 {% extends "base.html" %}
 
 {% block content %}
-<h2>Dashboard</h2>
-
-<!-- Enhanced Notifications -->
-{% if expired_medicines|length > 0 %}
-<div class="alert alert-danger" role="alert">
-    <strong>Alert:</strong> There are {{ expired_medicines|length }} expired medicines! Please review immediately.
+<div class="page-header">
+    <div>
+        <h1 class="page-title">Dashboard</h1>
+        <p class="page-subtitle">Daily health snapshot of your medical store</p>
+    </div>
+    <div class="page-actions">
+        <a href="{{ url_for('backup') }}" class="btn btn-primary btn-pill">
+            <i class="fa-solid fa-cloud-arrow-down me-2"></i> Backup Data
+        </a>
+    </div>
 </div>
+
+{% if expired_medicines|length > 0 %}
+    <div class="alert alert-danger alert-modern mb-3" role="alert">
+        <i class="fa-solid fa-triangle-exclamation fa-lg"></i>
+        <div>
+            <strong>{{ expired_medicines|length }} expired medicines</strong>
+            <div class="text-muted">Please remove or replace them immediately.</div>
+        </div>
+    </div>
 {% endif %}
 {% if low_stock_medicines|length > 0 %}
-<div class="alert alert-warning" role="alert">
-    <strong>Warning:</strong> {{ low_stock_medicines|length }} medicines are low in stock. Consider restocking soon.
-</div>
+    <div class="alert alert-warning alert-modern mb-4" role="alert">
+        <i class="fa-solid fa-circle-exclamation fa-lg"></i>
+        <div>
+            <strong>{{ low_stock_medicines|length }} items running low</strong>
+            <div class="text-muted">Review re-order levels today.</div>
+        </div>
+    </div>
 {% endif %}
 
-<div class="row">
-    <div class="col-md-4">
-        <div class="card shadow">
-            <div class="card-body">
-                <h5>Total Medicines</h5>
-                <p class="fs-3">{{ medicine_count }}</p>
-                <h5>Total Customers</h5>
-                <p class="fs-3">{{ customer_count }}</p>
+<div class="metric-grid">
+    <div class="metric-card">
+        <div class="metric-label">Total Medicines</div>
+        <div class="metric-value">{{ medicine_count }}</div>
+        <div class="metric-label mt-3">Total Customers</div>
+        <div class="metric-value">{{ customer_count }}</div>
+    </div>
+    <div class="metric-card">
+        <div class="metric-label">Expired Stock</div>
+        <div class="metric-value text-danger">{{ expired_medicines|length }}</div>
+        <span class="badge-soft danger">Immediate action required</span>
+    </div>
+    <div class="metric-card">
+        <div class="metric-label">Low Stock</div>
+        <div class="metric-value text-warning">{{ low_stock_medicines|length }}</div>
+        <span class="badge-soft warning">Monitor reorder list</span>
+    </div>
+</div>
+
+<div class="row g-4 mt-1">
+    <div class="col-md-6">
+        <div class="card-surface h-100">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h4 class="mb-0">Expired Medicines</h4>
+                <span class="badge-soft danger">{{ expired_medicines|length }}</span>
+            </div>
+            <div class="list-group list-group-flush">
+                {% for medicine in expired_medicines %}
+                    <div class="list-group-item d-flex justify-content-between">
+                        <div>
+                            <div class="fw-semibold">{{ medicine.name }}</div>
+                            <small class="text-muted">Batch {{ medicine.batch_number }}</small>
+                        </div>
+                        <span class="badge-soft danger">Expired {{ medicine.expiry_date.strftime('%Y-%m-%d') }}</span>
+                    </div>
+                {% else %}
+                    <div class="text-muted">🎉 Great! No expired items.</div>
+                {% endfor %}
             </div>
         </div>
     </div>
-    <div class="col-md-4">
-        <div class="card shadow bg-danger text-white">
-            <div class="card-body">
-                <h5>Expired Medicines</h5>
-                <p class="fs-3">{{ expired_medicines|length }}</p>
+    <div class="col-md-6">
+        <div class="card-surface h-100">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h4 class="mb-0">Low Stock Watchlist</h4>
+                <span class="badge-soft warning">{{ low_stock_medicines|length }}</span>
             </div>
-        </div>
-    </div>
-    <div class="col-md-4">
-        <div class="card shadow bg-warning text-white">
-            <div class="card-body">
-                <h5>Low Stock Medicines</h5>
-                <p class="fs-3">{{ low_stock_medicines|length }}</p>
+            <div class="list-group list-group-flush">
+                {% for medicine in low_stock_medicines %}
+                    <div class="list-group-item d-flex justify-content-between">
+                        <div>
+                            <div class="fw-semibold">{{ medicine.name }}</div>
+                            <small class="text-muted">Batch {{ medicine.batch_number }}</small>
+                        </div>
+                        <span class="badge-soft warning">Qty {{ medicine.quantity }}</span>
+                    </div>
+                {% else %}
+                    <div class="text-muted">Stock levels look healthy.</div>
+                {% endfor %}
             </div>
         </div>
     </div>
 </div>
 
-<div class="row mt-4">
+<div class="row g-4 mt-1">
     <div class="col-md-6">
-        <h4>Expired Medicines</h4>
-        <ul class="list-group">
-            {% for medicine in expired_medicines %}
-                <li class="list-group-item">{{ medicine.name }} (Expired on: {{ medicine.expiry_date.strftime('%Y-%m-%d') }})</li>
-            {% endfor %}
-        </ul>
-    </div>
-    <div class="col-md-6">
-        <h4>Low Stock Medicines</h4>
-        <ul class="list-group">
-            {% for medicine in low_stock_medicines %}
-                <li class="list-group-item">{{ medicine.name }} (Quantity: {{ medicine.quantity }})</li>
-            {% endfor %}
-        </ul>
-    </div>
-</div>
-
-<div class="row mt-4">
-    <div class="col-md-6">
-        <h4>Sales (Last 7 Days)</h4>
-        <canvas id="salesChart" height="120"></canvas>
-    </div>
-    <div class="col-md-6">
-        <h4>Backup & Restore</h4>
-        <a href="{{ url_for('backup') }}" class="btn btn-primary">Backup Database</a>
-        <form action="{{ url_for('restore') }}" method="post" enctype="multipart/form-data" class="mt-2">
-            <div class="form-group">
-                <input type="file" name="backup_file" class="form-control">
+        <div class="card-surface h-100">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h4 class="mb-0">Sales (Last 7 Days)</h4>
+                <span class="badge-soft success">Live</span>
             </div>
-            <button type="submit" class="btn btn-success mt-2">Restore Database</button>
-        </form>
+            <canvas id="salesChart" height="130"></canvas>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="card-surface h-100">
+            <h4 class="mb-3">Backup & Restore</h4>
+            <p class="text-muted">Keep your business safe with routine backups.</p>
+            <div class="d-flex gap-3 flex-wrap">
+                <a href="{{ url_for('backup') }}" class="btn btn-outline-primary btn-pill">
+                    <i class="fa-solid fa-download me-2"></i> Backup Database
+                </a>
+                <form action="{{ url_for('restore') }}" method="post" enctype="multipart/form-data" class="flex-grow-1">
+                    <div class="input-group">
+                        <input type="file" name="backup_file" class="form-control" required>
+                        <button class="btn btn-success" type="submit">
+                            <i class="fa-solid fa-rotate me-2"></i> Restore
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
     </div>
 </div>
+{% endblock %}
 
+{% block scripts %}
+{{ super() }}
 <script>
-// Data for the last 7 days (from backend)
-const salesLabels = {{ sales_labels|tojson }};
-const salesData = {{ sales_data|tojson }};
-const ctx = document.getElementById('salesChart').getContext('2d');
-new Chart(ctx, {
-    type: 'bar',
-    data: {
-        labels: salesLabels,
-        datasets: [{
-            label: 'Sales',
-            data: salesData,
-            backgroundColor: 'rgba(54, 162, 235, 0.7)'
-        }]
-    },
-    options: {
-        responsive: true,
-        plugins: {
-            legend: { display: false }
-        },
-        scales: {
-            y: { beginAtZero: true }
-        }
+    const salesLabels = JSON.parse('{{ sales_labels|tojson|safe }}');
+    const salesData = JSON.parse('{{ sales_data|tojson|safe }}');
+    const ctx = document.getElementById('salesChart');
+    if (ctx) {
+        new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: salesLabels,
+                datasets: [{
+                    label: 'Sales',
+                    data: salesData,
+                    backgroundColor: 'rgba(37, 99, 235, 0.65)',
+                    borderRadius: 8,
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: { legend: { display: false } },
+                scales: {
+                    y: { beginAtZero: true }
+                }
+            }
+        });
     }
-});
 </script>
 {% endblock %}

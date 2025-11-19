@@ -1,0 +1,75 @@
+{% extends "base.html" %}
+{% block content %}
+    <div class="content-section">
+        <h2>Patients</h2>
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <a href="{{ url_for('add_patient') }}" class="btn btn-primary">Add New Patient</a>
+            
+            <!-- Search Form -->
+            <form method="GET" class="d-flex">
+                <input type="text" name="search" class="form-control me-2" placeholder="Search patients..." 
+                       value="{{ search_query or '' }}">
+                <button type="submit" class="btn btn-outline-secondary">Search</button>
+                {% if search_query %}
+                    <a href="{{ url_for('patients') }}" class="btn btn-outline-danger ms-2">Clear</a>
+                {% endif %}
+            </form>
+        </div>
+        
+        <div class="table-responsive">
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Date of Birth</th>
+                        <th>Gender</th>
+                        <th>Phone</th>
+                        <th>Email</th>
+                        <th>Insurance</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for patient in patients %}
+                        <tr>
+                            <td>
+                                <a href="{{ url_for('patient_profile', patient_id=patient.id) }}" 
+                                   class="text-decoration-none">
+                                    {{ patient.full_name }}
+                                </a>
+                            </td>
+                            <td>{{ patient.date_of_birth.strftime('%Y-%m-%d') if patient.date_of_birth else '-' }}</td>
+                            <td>{{ patient.gender or '-' }}</td>
+                            <td>{{ patient.phone_number or '-' }}</td>
+                            <td>{{ patient.email or '-' }}</td>
+                            <td>{{ patient.insurance_provider or '-' }}</td>
+                            <td>
+                                <a href="{{ url_for('patient_profile', patient_id=patient.id) }}" 
+                                   class="btn btn-sm btn-info">View</a>
+                                <a href="{{ url_for('edit_patient', id=patient.id) }}" 
+                                   class="btn btn-sm btn-warning">Edit</a>
+                                <form action="{{ url_for('delete_patient', id=patient.id) }}" method="POST" 
+                                      style="display:inline;">
+                                    <button type="submit" class="btn btn-sm btn-danger" 
+                                            onclick="return confirm('Are you sure? This will delete all medical history for this patient.')">
+                                        Delete
+                                    </button>
+                                </form>
+                            </td>
+                        </tr>
+                    {% else %}
+                        <tr>
+                            <td colspan="7" class="text-center">
+                                {% if search_query %}
+                                    No patients found matching "{{ search_query }}".
+                                {% else %}
+                                    No patients registered yet.
+                                {% endif %}
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+{% endblock content %}

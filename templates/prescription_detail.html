@@ -1,0 +1,232 @@
+{% extends "base.html" %}
+
+{% block title %}Prescription Details{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-md-12">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h2><i class="fas fa-prescription"></i> Prescription #{{ prescription.id }}</h2>
+                <div class="btn-group">
+                    <a href="{{ url_for('prescriptions') }}" class="btn btn-outline-secondary">
+                        <i class="fas fa-arrow-left"></i> Back
+                    </a>
+                    {% if prescription.status == 'Active' %}
+                    <a href="{{ url_for('edit_prescription', id=prescription.id) }}" class="btn btn-outline-warning">
+                        <i class="fas fa-edit"></i> Edit
+                    </a>
+                    <a href="{{ url_for('dispense_prescription', id=prescription.id) }}" class="btn btn-outline-success">
+                        <i class="fas fa-pills"></i> Dispense
+                    </a>
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="row">
+                <!-- Patient Information -->
+                <div class="col-md-6">
+                    <div class="card mb-4">
+                        <div class="card-header">
+                            <h5><i class="fas fa-user"></i> Patient Information</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-6">
+                                    <p><strong>Name:</strong><br>{{ prescription.patient.first_name }} {{ prescription.patient.last_name }}</p>
+                                    <p><strong>Age:</strong><br>{{ prescription.patient.age or 'N/A' }}</p>
+                                    <p><strong>Gender:</strong><br>{{ prescription.patient.gender or 'N/A' }}</p>
+                                </div>
+                                <div class="col-6">
+                                    <p><strong>Phone:</strong><br>{{ prescription.patient.phone or 'N/A' }}</p>
+                                    <p><strong>Blood Group:</strong><br>{{ prescription.patient.blood_group or 'N/A' }}</p>
+                                    <p><strong>Allergies:</strong><br>{{ prescription.patient.allergies or 'None' }}</p>
+                                </div>
+                            </div>
+                            <div class="mt-3">
+                                <a href="{{ url_for('patient_profile', id=prescription.patient.id) }}" 
+                                   class="btn btn-sm btn-outline-primary">
+                                    <i class="fas fa-user-circle"></i> View Patient Profile
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Prescription Details -->
+                <div class="col-md-6">
+                    <div class="card mb-4">
+                        <div class="card-header">
+                            <h5><i class="fas fa-stethoscope"></i> Prescription Details</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-12">
+                                    <p><strong>Doctor:</strong><br>{{ prescription.doctor_name }}</p>
+                                    <p><strong>Date:</strong><br>{{ prescription.prescription_date.strftime('%B %d, %Y') }}</p>
+                                    <p><strong>Status:</strong><br>
+                                        {% if prescription.status == 'Active' %}
+                                            <span class="badge bg-success fs-6">{{ prescription.status }}</span>
+                                        {% elif prescription.status == 'Dispensed' %}
+                                            <span class="badge bg-secondary fs-6">{{ prescription.status }}</span>
+                                        {% else %}
+                                            <span class="badge bg-danger fs-6">{{ prescription.status }}</span>
+                                        {% endif %}
+                                    </p>
+                                    {% if prescription.diagnosis %}
+                                    <p><strong>Diagnosis:</strong><br>{{ prescription.diagnosis }}</p>
+                                    {% endif %}
+                                    {% if prescription.notes %}
+                                    <p><strong>Notes:</strong><br>{{ prescription.notes }}</p>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Prescription Items -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5><i class="fas fa-pills"></i> Prescribed Medicines</h5>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-striped">
+                            <thead class="table-dark">
+                                <tr>
+                                    <th>Medicine</th>
+                                    <th>Dosage</th>
+                                    <th>Frequency</th>
+                                    <th>Duration</th>
+                                    <th>Instructions</th>
+                                    <th>Quantity</th>
+                                    <th>Unit Price</th>
+                                    <th>Total</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for item in prescription.items %}
+                                <tr>
+                                    <td>
+                                        <div class="fw-bold">{{ item.medicine.name }}</div>
+                                        <small class="text-muted">{{ item.medicine.manufacturer }}</small>
+                                    </td>
+                                    <td>{{ item.dosage or 'N/A' }}</td>
+                                    <td>{{ item.frequency or 'N/A' }}</td>
+                                    <td>{{ item.duration_days or 'N/A' }} days</td>
+                                    <td>{{ item.instructions or 'N/A' }}</td>
+                                    <td>{{ item.quantity }}</td>
+                                    <td>₹{{ "%.2f"|format(item.unit_price) }}</td>
+                                    <td>₹{{ "%.2f"|format(item.total_price) }}</td>
+                                </tr>
+                                {% endfor %}
+                                <tr class="table-light">
+                                    <td colspan="7" class="text-end fw-bold">Total Amount:</td>
+                                    <td class="fw-bold">₹{{ "%.2f"|format(prescription.total_amount) }}</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Dispensing History -->
+            {% if prescription.status == 'Dispensed' %}
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5><i class="fas fa-history"></i> Dispensing History</h5>
+                </div>
+                <div class="card-body">
+                    {% if prescription.sales %}
+                    <div class="table-responsive">
+                        <table class="table table-sm">
+                            <thead>
+                                <tr>
+                                    <th>Sale ID</th>
+                                    <th>Date</th>
+                                    <th>Amount</th>
+                                    <th>Payment Method</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for sale in prescription.sales %}
+                                <tr>
+                                    <td>#{{ sale.id }}</td>
+                                    <td>{{ sale.sale_date.strftime('%Y-%m-%d %H:%M') }}</td>
+                                    <td>₹{{ "%.2f"|format(sale.total_amount) }}</td>
+                                    <td>{{ sale.payment_method }}</td>
+                                    <td>
+                                        <a href="{{ url_for('view_sale', id=sale.id) }}" 
+                                           class="btn btn-sm btn-outline-primary">
+                                            View Sale
+                                        </a>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {% else %}
+                    <div class="alert alert-info">
+                        <i class="fas fa-info-circle"></i> No dispensing records found.
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Actions -->
+            {% if prescription.status == 'Active' %}
+            <div class="card">
+                <div class="card-header">
+                    <h5><i class="fas fa-cogs"></i> Actions</h5>
+                </div>
+                <div class="card-body">
+                    <div class="d-flex gap-2">
+                        <a href="{{ url_for('add_prescription_item', prescription_id=prescription.id) }}" 
+                           class="btn btn-outline-primary">
+                            <i class="fas fa-plus"></i> Add Medicine
+                        </a>
+                        <a href="{{ url_for('dispense_prescription', id=prescription.id) }}" 
+                           class="btn btn-success">
+                            <i class="fas fa-pills"></i> Dispense All
+                        </a>
+                        <button class="btn btn-outline-warning" onclick="changeStatus('{{ prescription.id }}', 'Cancelled')">
+                            <i class="fas fa-ban"></i> Cancel Prescription
+                        </button>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<script>
+function changeStatus(prescriptionId, status) {
+    if (confirm(`Are you sure you want to change the prescription status to ${status}?`)) {
+        const form = document.createElement('form');
+        form.method = 'POST';
+        form.action = `/prescriptions/${prescriptionId}/status`;
+        
+        const statusInput = document.createElement('input');
+        statusInput.type = 'hidden';
+        statusInput.name = 'status';
+        statusInput.value = status;
+        
+        const csrfInput = document.createElement('input');
+        csrfInput.type = 'hidden';
+        csrfInput.name = 'csrf_token';
+        csrfInput.value = '{{ csrf_token() }}';
+        
+        form.appendChild(statusInput);
+        form.appendChild(csrfInput);
+        document.body.appendChild(form);
+        form.submit();
+    }
+}
+</script>
+{% endblock %}

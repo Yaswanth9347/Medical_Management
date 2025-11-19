@@ -1,86 +1,124 @@
 {% extends "base.html" %}
 
 {% block content %}
-<h2>Sales Management</h2>
+<div class="page-header">
+    <div>
+        <h1 class="page-title">Sales</h1>
+        <p class="page-subtitle">Capture bills quickly and review historical revenue.</p>
+    </div>
+    <div class="page-actions">
+        <a href="{{ url_for('download_report', report_type='sales') }}" class="btn btn-outline-primary btn-pill">
+            <i class="fa-solid fa-file-invoice-dollar me-2"></i> Export Sales
+        </a>
+        <a href="{{ url_for('download_report', report_type='gst') }}" class="btn btn-outline-secondary btn-pill">
+            <i class="fa-solid fa-indian-rupee-sign me-2"></i> GST Summary
+        </a>
+    </div>
+</div>
 
-<div class="row">
-    <div class="col-md-4">
-        <h3>Create New Sale</h3>
-        <form method="POST" action="">
-            {{ form.hidden_tag() }}
-            <div class="form-group">
-                {{ form.customer.label(class="form-control-label") }}
-                {{ form.customer(class="form-control") }}
+<div class="row g-4">
+    <div class="col-lg-5">
+        <div class="form-card">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h4 class="mb-0">Create sale</h4>
+                <span class="badge-soft success">Live stock</span>
             </div>
-            <hr>
-            <h4>Sale Items</h4>
-            <div id="sale-items">
-                {% for item_form in form.items %}
-                <div class="sale-item">
-                    {{ item_form.hidden_tag() }}
-                    <div class="form-group">
-                        {{ item_form.medicine.label(class="form-control-label") }}
-                        {{ item_form.medicine(class="form-control") }}
+            <form method="POST" novalidate>
+                {{ form.hidden_tag() }}
+                <div class="mb-3">
+                    {{ form.customer.label(class="form-label fw-semibold") }}
+                    {{ form.customer(class="form-select") }}
+                </div>
+                <div class="border rounded-4 p-3 bg-light-subtle">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h5 class="mb-0">Items</h5>
+                        <button type="button" id="add-item" class="btn btn-sm btn-outline-primary">Add line</button>
                     </div>
-                    <div class="form-group">
-                        {{ item_form.quantity.label(class="form-control-label") }}
-                        {{ item_form.quantity(class="form-control") }}
+                    <div id="sale-items" class="d-flex flex-column gap-3">
+                        {% for item_form in form.items %}
+                        <div class="sale-item bg-white rounded-3 p-3 shadow-sm">
+                            {{ item_form.hidden_tag() }}
+                            <div class="mb-2">
+                                {{ item_form.medicine.label(class="form-label") }}
+                                {{ item_form.medicine(class="form-select") }}
+                            </div>
+                            <div>
+                                {{ item_form.quantity.label(class="form-label") }}
+                                {{ item_form.quantity(class="form-control", min=1) }}
+                            </div>
+                        </div>
+                        {% endfor %}
                     </div>
                 </div>
-                {% endfor %}
-            </div>
-            <button type="button" id="add-item" class="btn btn-secondary mb-3">Add Another Item</button>
-            <div class="form-group">
-                {{ form.submit(class="btn btn-primary") }}
-            </div>
-        </form>
+                <div class="d-grid mt-4">
+                    {{ form.submit(class="btn btn-primary btn-pill") }}
+                </div>
+            </form>
+        </div>
     </div>
-    <div class="col-md-8">
-        <h3>Sales History</h3>
-        <form class="d-flex mb-3">
-            <input class="form-control me-2" type="date" name="start_date">
-            <input class="form-control me-2" type="date" name="end_date">
-            <button class="btn btn-outline-success" type="submit">Filter</button>
-        </form>
-        <table class="table table-striped">
-            <thead>
-                <tr>
-                    <th>Sale ID</th>
-                    <th>Total Amount</th>
-                    <th>GST Amount</th>
-                    <th>Date</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for sale in sales %}
-                <tr>
-                    <td>{{ sale.id }}</td>
-                    <td>{{ sale.total_amount }}</td>
-                    <td>{{ sale.gst_amount }}</td>
-                    <td>{{ sale.created_at.strftime('%Y-%m-%d %H:%M:%S') }}</td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
+    <div class="col-lg-7">
+        <div class="card-surface h-100">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h4 class="mb-0">Sales history</h4>
+                <form class="d-flex gap-2" method="get">
+                    <input class="form-control" type="date" name="start_date" value="{{ request.args.get('start_date','') }}">
+                    <input class="form-control" type="date" name="end_date" value="{{ request.args.get('end_date','') }}">
+                    <button class="btn btn-outline-primary" type="submit">Filter</button>
+                </form>
+            </div>
+            <div class="table-responsive">
+                <table class="table-modern">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Customer</th>
+                            <th>Date</th>
+                            <th>Total</th>
+                            <th>GST</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for sale in sales %}
+                        <tr>
+                            <td>#{{ sale.id }}</td>
+                            <td>{{ sale.customer.name if sale.customer else 'Walk-in' }}</td>
+                            <td>{{ sale.created_at.strftime('%Y-%m-%d %H:%M') }}</td>
+                            <td>₹{{ '%.2f'|format(sale.total_amount) }}</td>
+                            <td>₹{{ '%.2f'|format(sale.gst_amount) }}</td>
+                            <td class="text-end">
+                                <a href="{{ url_for('generate_bill', sale_id=sale.id) }}" class="btn btn-sm btn-outline-secondary">Bill</a>
+                            </td>
+                        </tr>
+                        {% else %}
+                        <tr>
+                            <td colspan="6" class="text-center text-muted py-4">No sales recorded for this period.</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
     </div>
 </div>
 {% endblock %}
 
 {% block scripts %}
 <script>
-    document.getElementById('add-item').addEventListener('click', function() {
-        var saleItems = document.getElementById('sale-items');
-        var newItem = saleItems.children[0].cloneNode(true);
-        var newIndex = saleItems.children.length;
-
-        // Update the name attributes for the new fields
-        newItem.querySelectorAll('[name]').forEach(function(el) {
-            el.name = el.name.replace('-0-', '-' + newIndex + '-');
-            el.id = el.id.replace('-0-', '-' + newIndex + '-');
-            el.value = ''; // Clear the value of the cloned fields
+    const addItemBtn = document.getElementById('add-item');
+    addItemBtn?.addEventListener('click', () => {
+        const saleItems = document.getElementById('sale-items');
+        const template = saleItems.children[0];
+        if (!template) return;
+        const clone = template.cloneNode(true);
+        const newIndex = saleItems.children.length;
+        clone.querySelectorAll('[name]').forEach((el) => {
+            el.name = el.name.replace('-0-', `-${newIndex}-`);
+            el.id = el.id.replace('-0-', `-${newIndex}-`);
+            if (el.tagName === 'INPUT') el.value = '';
+            if (el.tagName === 'SELECT') el.selectedIndex = 0;
         });
-
-        saleItems.appendChild(newItem);
+        saleItems.appendChild(clone);
     });
 </script>
-{% endblock scripts %}
+{% endblock %}

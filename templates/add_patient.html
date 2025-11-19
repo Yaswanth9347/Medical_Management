@@ -1,0 +1,238 @@
+{% extends "base.html" %}
+{% block content %}
+    <div class="content-section">
+        <h2>Add New Patient</h2>
+        <a href="{{ url_for('patients') }}" class="btn btn-secondary mb-3">← Back to Patients</a>
+        
+        <form method="POST">
+            {{ form.hidden_tag() }}
+            
+            <!-- Personal Information Section -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5>Personal Information</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group mb-3">
+                                {{ form.first_name.label(class="form-label") }}
+                                {{ form.first_name(class="form-control") }}
+                                {% if form.first_name.errors %}
+                                    <div class="text-danger">
+                                        {% for error in form.first_name.errors %}
+                                            <small>{{ error }}</small>
+                                        {% endfor %}
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group mb-3">
+                                {{ form.last_name.label(class="form-label") }}
+                                {{ form.last_name(class="form-control") }}
+                                {% if form.last_name.errors %}
+                                    <div class="text-danger">
+                                        {% for error in form.last_name.errors %}
+                                            <small>{{ error }}</small>
+                                        {% endfor %}
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div class="form-group mb-3">
+                                {{ form.date_of_birth.label(class="form-label") }}
+                                {{ form.date_of_birth(class="form-control") }}
+                                {% if form.date_of_birth.errors %}
+                                    <div class="text-danger">
+                                        {% for error in form.date_of_birth.errors %}
+                                            <small>{{ error }}</small>
+                                        {% endfor %}
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-group mb-3">
+                                {{ form.gender.label(class="form-label") }}
+                                {{ form.gender(class="form-control") }}
+                                {% if form.gender.errors %}
+                                    <div class="text-danger">
+                                        {% for error in form.gender.errors %}
+                                            <small>{{ error }}</small>
+                                        {% endfor %}
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-group mb-3">
+                                {{ form.blood_group.label(class="form-label") }}
+                                {{ form.blood_group(class="form-control") }}
+                                {% if form.blood_group.errors %}
+                                    <div class="text-danger">
+                                        {% for error in form.blood_group.errors %}
+                                            <small>{{ error }}</small>
+                                        {% endfor %}
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group mb-3">
+                                {{ form.phone_number.label(class="form-label") }}
+                                {{ form.phone_number(class="form-control") }}
+                                {% if form.phone_number.errors %}
+                                    <div class="text-danger">
+                                        {% for error in form.phone_number.errors %}
+                                            <small>{{ error }}</small>
+                                        {% endfor %}
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group mb-3">
+                                {{ form.email.label(class="form-label") }}
+                                {{ form.email(class="form-control") }}
+                                {% if form.email.errors %}
+                                    <div class="text-danger">
+                                        {% for error in form.email.errors %}
+                                            <small>{{ error }}</small>
+                                        {% endfor %}
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group mb-3">
+                        {{ form.address.label(class="form-label") }}
+                        {{ form.address(class="form-control", rows="3") }}
+                        {% if form.address.errors %}
+                            <div class="text-danger">
+                                {% for error in form.address.errors %}
+                                    <small>{{ error }}</small>
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Insurance Information Section -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5>Insurance Information</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group mb-3">
+                                {{ form.insurance_provider.label(class="form-label") }}
+                                {{ form.insurance_provider(class="form-control") }}
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group mb-3">
+                                {{ form.insurance_expiry_date.label(class="form-label") }}
+                                {{ form.insurance_expiry_date(class="form-control") }}
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group mb-3">
+                                {{ form.insurance_policy_number.label(class="form-label") }}
+                                {{ form.insurance_policy_number(class="form-control") }}
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group mb-3">
+                                {{ form.insurance_group_number.label(class="form-label") }}
+                                {{ form.insurance_group_number(class="form-control") }}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Emergency Contact Section -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5>Emergency Contact</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group mb-3">
+                                {{ form.emergency_contact_name.label(class="form-label") }}
+                                {{ form.emergency_contact_name(class="form-control") }}
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group mb-3">
+                                {{ form.emergency_contact_relationship.label(class="form-label") }}
+                                {{ form.emergency_contact_relationship(class="form-control") }}
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group mb-3">
+                                {{ form.emergency_contact_phone.label(class="form-label") }}
+                                {{ form.emergency_contact_phone(class="form-control") }}
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group mb-3">
+                                {{ form.emergency_contact_email.label(class="form-label") }}
+                                {{ form.emergency_contact_email(class="form-control") }}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Medical Information Section -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5>Medical Information</h5>
+                </div>
+                <div class="card-body">
+                    <div class="form-group mb-3">
+                        {{ form.allergies.label(class="form-label") }}
+                        {{ form.allergies(class="form-control", rows="3") }}
+                        <small class="form-text text-muted">List any known allergies</small>
+                    </div>
+                    
+                    <div class="form-group mb-3">
+                        {{ form.chronic_conditions.label(class="form-label") }}
+                        {{ form.chronic_conditions(class="form-control", rows="3") }}
+                        <small class="form-text text-muted">List any chronic conditions</small>
+                    </div>
+                    
+                    <div class="form-group mb-3">
+                        {{ form.current_medications.label(class="form-label") }}
+                        {{ form.current_medications(class="form-control", rows="3") }}
+                        <small class="form-text text-muted">List current medications and dosages</small>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="form-group">
+                {{ form.submit(class="btn btn-primary") }}
+                <a href="{{ url_for('patients') }}" class="btn btn-secondary">Cancel</a>
+            </div>
+        </form>
+    </div>
+{% endblock content %}

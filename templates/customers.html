@@ -1,70 +1,92 @@
 {% extends "base.html" %}
 
 {% block content %}
-<h2>Customer Management</h2>
-
-<div class="row">
-    <div class="col-md-4">
-        <h3>Add New Customer</h3>
-        <form method="POST" action="">
-            {{ form.hidden_tag() }}
-            <div class="form-group">
-                {{ form.name.label(class="form-control-label") }}
-                {{ form.name(class="form-control") }}
-            </div>
-            <div class="form-group">
-                {{ form.phone_number.label(class="form-control-label") }}
-                {{ form.phone_number(class="form-control") }}
-            </div>
-            <div class="form-group">
-                {{ form.email.label(class="form-control-label") }}
-                {{ form.email(class="form-control") }}
-            </div>
-            <div class="form-group">
-                {{ form.address.label(class="form-control-label") }}
-                {{ form.address(class="form-control") }}
-            </div>
-            <div class="form-group">
-                {{ form.submit(class="btn btn-primary") }}
-            </div>
-        </form>
+<div class="page-header">
+    <div>
+        <h1 class="page-title">Customers</h1>
+        <p class="page-subtitle">Maintain accurate contact profiles and purchase history.</p>
     </div>
-<div class="col-md-8">
-    <h3>Customer List</h3>
-    <form method="get" action="{{ url_for('customers') }}" class="mb-3">
-        <div class="input-group">
-            <input type="text" name="search" class="form-control" placeholder="Search by name or phone" value="{{ search_query or '' }}">
-            <button type="submit" class="btn btn-primary">Search</button>
-        </div>
-    </form>
-    <table class="table table-striped">
-        <thead>
-            <tr>
-                <th>Name</th>
-                <th>Phone Number</th>
-                <th>Email</th>
-                <th>Address</th>
-                <th>Actions</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for customer in customers %}
-            <tr>
-                <td>{{ customer.name }}</td>
-                <td>{{ customer.phone_number }}</td>
-                <td>{{ customer.email }}</td>
-                <td>{{ customer.address }}</td>
-                <td>
-                    <a href="{{ url_for('edit_customer', id=customer.id) }}" class="btn btn-warning">Edit</a>
-                    <a href="{{ url_for('delete_customer', id=customer.id) }}" class="btn btn-danger">Delete</a>
-                    <a href="{{ url_for('customer_history', customer_id=customer.id) }}" class="btn btn-info">History</a>
-                </td>
-            </tr>
-            {% else %}
-            <tr><td colspan="5">No customers found.</td></tr>
-            {% endfor %}
-        </tbody>
-    </table>
+    <div class="page-actions">
+        <a href="{{ url_for('sales') }}" class="btn btn-outline-primary btn-pill">
+            <i class="fa-solid fa-cart-shopping me-2"></i> New Sale
+        </a>
+    </div>
 </div>
+
+<div class="row g-4">
+    <div class="col-lg-4">
+        <div class="form-card">
+            <h4 class="mb-3">Add customer</h4>
+            <form method="POST" novalidate>
+                {{ form.hidden_tag() }}
+                <div class="mb-3">
+                    {{ form.name.label(class="form-label fw-semibold") }}
+                    {{ form.name(class="form-control") }}
+                </div>
+                <div class="mb-3">
+                    {{ form.phone_number.label(class="form-label fw-semibold") }}
+                    {{ form.phone_number(class="form-control") }}
+                </div>
+                <div class="mb-3">
+                    {{ form.email.label(class="form-label fw-semibold") }}
+                    {{ form.email(class="form-control") }}
+                </div>
+                <div class="mb-4">
+                    {{ form.address.label(class="form-label fw-semibold") }}
+                    {{ form.address(class="form-control") }}
+                </div>
+                <div class="d-grid">
+                    {{ form.submit(class="btn btn-primary btn-pill") }}
+                </div>
+            </form>
+        </div>
+    </div>
+    <div class="col-lg-8">
+        <div class="card-surface">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h4 class="mb-0">Customer list</h4>
+                <form method="get" class="d-flex gap-2">
+                    <input type="text" name="search" class="form-control" placeholder="Search by name or phone" value="{{ search_query or '' }}">
+                    <button type="submit" class="btn btn-outline-primary">Search</button>
+                </form>
+            </div>
+            <div class="table-responsive">
+                <table class="table-modern">
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Contact</th>
+                            <th>Address</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for customer in customers %}
+                        <tr>
+                            <td>
+                                <div class="fw-semibold">{{ customer.name }}</div>
+                                <small class="text-muted">Joined {{ customer.created_at.strftime('%Y-%m-%d') if customer.created_at else '' }}</small>
+                            </td>
+                            <td>
+                                <div>{{ customer.phone_number or '—' }}</div>
+                                <small class="text-muted">{{ customer.email or 'No email' }}</small>
+                            </td>
+                            <td>{{ customer.address or '—' }}</td>
+                            <td class="text-end">
+                                <div class="btn-group">
+                                    <a href="{{ url_for('customer_history', customer_id=customer.id) }}" class="btn btn-sm btn-outline-secondary">History</a>
+                                    <a href="{{ url_for('edit_customer', id=customer.id) }}" class="btn btn-sm btn-outline-primary">Edit</a>
+                                    <a href="{{ url_for('delete_customer', id=customer.id) }}" class="btn btn-sm btn-outline-danger">Delete</a>
+                                </div>
+                            </td>
+                        </tr>
+                        {% else %}
+                        <tr><td colspan="4" class="text-center text-muted py-4">No customers found.</td></tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
 </div>
 {% endblock %}

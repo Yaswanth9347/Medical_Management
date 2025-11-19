@@ -1,0 +1,145 @@
+{% extends "base.html" %}
+{% block content %}
+    <div class="content-section">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <div>
+                <h2>Inventory Alerts</h2>
+                <p class="text-muted">Monitor stock levels, expiry dates, and maintenance schedules</p>
+            </div>
+            <a href="{{ url_for('inventory_dashboard') }}" class="btn btn-outline-primary">Dashboard</a>
+        </div>
+        
+        <!-- Filters -->
+        <div class="card mb-4">
+            <div class="card-body">
+                <form method="GET" class="row g-3">
+                    <div class="col-md-3">
+                        <label class="form-label">Alert Type</label>
+                        <select name="alert_type" class="form-control">
+                            <option value="">All Types</option>
+                            <option value="LOW_STOCK" {{ 'selected' if alert_type_filter == 'LOW_STOCK' }}>Low Stock</option>
+                            <option value="OUT_OF_STOCK" {{ 'selected' if alert_type_filter == 'OUT_OF_STOCK' }}>Out of Stock</option>
+                            <option value="EXPIRED" {{ 'selected' if alert_type_filter == 'EXPIRED' }}>Expired</option>
+                            <option value="EXPIRING_SOON" {{ 'selected' if alert_type_filter == 'EXPIRING_SOON' }}>Expiring Soon</option>
+                            <option value="MAINTENANCE_DUE" {{ 'selected' if alert_type_filter == 'MAINTENANCE_DUE' }}>Maintenance Due</option>
+                            <option value="WARRANTY_EXPIRED" {{ 'selected' if alert_type_filter == 'WARRANTY_EXPIRED' }}>Warranty Expired</option>
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label">Severity</label>
+                        <select name="severity" class="form-control">
+                            <option value="">All Severities</option>
+                            <option value="Critical" {{ 'selected' if severity_filter == 'Critical' }}>Critical</option>
+                            <option value="High" {{ 'selected' if severity_filter == 'High' }}>High</option>
+                            <option value="Medium" {{ 'selected' if severity_filter == 'Medium' }}>Medium</option>
+                            <option value="Low" {{ 'selected' if severity_filter == 'Low' }}>Low</option>
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="form-check mt-4">
+                            <input class="form-check-input" type="checkbox" name="show_acknowledged" 
+                                   value="true" {{ 'checked' if show_acknowledged }}>
+                            <label class="form-check-label">Show Acknowledged</label>
+                        </div>
+                    </div>
+                    <div class="col-md-3 d-flex align-items-end">
+                        <button type="submit" class="btn btn-primary me-2">Filter</button>
+                        <a href="{{ url_for('inventory_alerts') }}" class="btn btn-secondary">Clear</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+        
+        <!-- Alerts List -->
+        {% if alerts %}
+            <div class="row">
+                {% for alert in alerts %}
+                    <div class="col-md-6 mb-3">
+                        <div class="card h-100 
+                            {% if alert.severity == 'Critical' %}border-danger
+                            {% elif alert.severity == 'High' %}border-warning
+                            {% elif alert.severity == 'Medium' %}border-info
+                            {% else %}border-secondary{% endif %}
+                            {{ ' opacity-50' if alert.is_acknowledged }}">
+                            <div class="card-body">
+                                <div class="d-flex justify-content-between align-items-start mb-2">
+                                    <div>
+                                        <h6 class="card-title mb-1">
+                                            {% if alert.severity == 'Critical' %}
+                                                <i class="fas fa-exclamation-circle text-danger"></i>
+                                            {% elif alert.severity == 'High' %}
+                                                <i class="fas fa-exclamation-triangle text-warning"></i>
+                                            {% elif alert.severity == 'Medium' %}
+                                                <i class="fas fa-info-circle text-info"></i>
+                                            {% else %}
+                                                <i class="fas fa-info text-secondary"></i>
+                                            {% endif %}
+                                            {{ alert.alert_type.replace('_', ' ').title() }}
+                                        </h6>
+                                        <span class="badge 
+                                            {% if alert.severity == 'Critical' %}bg-danger
+                                            {% elif alert.severity == 'High' %}bg-warning
+                                            {% elif alert.severity == 'Medium' %}bg-info
+                                            {% else %}bg-secondary{% endif %}">
+                                            {{ alert.severity }}
+                                        </span>
+                                        {% if alert.is_acknowledged %}
+                                            <span class="badge bg-success ms-1">Acknowledged</span>
+                                        {% endif %}
+                                    </div>
+                                    <small class="text-muted">
+                                        {{ alert.created_at.strftime('%Y-%m-%d %H:%M') }}
+                                    </small>
+                                </div>
+                                
+                                <p class="card-text">{{ alert.message }}</p>
+                                
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <strong>{{ alert.item_name }}</strong>
+                                        <br><small class="text-muted">{{ alert.item_type }}</small>
+                                    </div>
+                                    
+                                    {% if not alert.is_acknowledged %}
+                                        <div class="btn-group">
+                                            <form action="{{ url_for('acknowledge_alert', alert_id=alert.id) }}" 
+                                                  method="POST" style="display:inline;">
+                                                <button type="submit" class="btn btn-sm btn-success">
+                                                    Acknowledge
+                                                </button>
+                                            </form>
+                                            <form action="{{ url_for('dismiss_alert', alert_id=alert.id) }}" 
+                                                  method="POST" style="display:inline;">
+                                                <button type="submit" class="btn btn-sm btn-outline-danger"
+                                                        onclick="return confirm('Are you sure?')">
+                                                    Dismiss
+                                                </button>
+                                            </form>
+                                        </div>
+                                    {% else %}
+                                        <small class="text-muted">
+                                            Acknowledged by {{ alert.acknowledged_by }}<br>
+                                            {{ alert.acknowledged_at.strftime('%Y-%m-%d %H:%M') }}
+                                        </small>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <div class="text-center py-5">
+                <i class="fas fa-bell-slash fa-3x text-muted mb-3"></i>
+                <h5 class="text-muted">No alerts found</h5>
+                <p class="text-muted">
+                    {% if alert_type_filter or severity_filter %}
+                        No alerts match your current filters.
+                    {% else %}
+                        All inventory alerts have been addressed.
+                    {% endif %}
+                </p>
+            </div>
+        {% endif %}
+    </div>
+{% endblock content %}

@@ -1,0 +1,294 @@
+{% extends "base.html" %}
+
+{% block title %}Dispense Prescription{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-md-12">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h2><i class="fas fa-pills"></i> Dispense Prescription #{{ prescription.id }}</h2>
+                <a href="{{ url_for('prescription_detail', id=prescription.id) }}" class="btn btn-outline-secondary">
+                    <i class="fas fa-arrow-left"></i> Back to Prescription
+                </a>
+            </div>
+
+            <form method="POST" id="dispenseForm">
+                {{ form.hidden_tag() }}
+                
+                <!-- Patient and Prescription Info -->
+                <div class="row mb-4">
+                    <div class="col-md-6">
+                        <div class="card">
+                            <div class="card-header">
+                                <h6><i class="fas fa-user"></i> Patient Information</h6>
+                            </div>
+                            <div class="card-body">
+                                <p><strong>{{ prescription.patient.first_name }} {{ prescription.patient.last_name }}</strong></p>
+                                <p class="mb-0">
+                                    <small class="text-muted">
+                                        Phone: {{ prescription.patient.phone or 'N/A' }} | 
+                                        Age: {{ prescription.patient.age or 'N/A' }}
+                                    </small>
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="card">
+                            <div class="card-header">
+                                <h6><i class="fas fa-stethoscope"></i> Prescription Details</h6>
+                            </div>
+                            <div class="card-body">
+                                <p><strong>Dr. {{ prescription.doctor_name }}</strong></p>
+                                <p class="mb-0">
+                                    <small class="text-muted">
+                                        Date: {{ prescription.prescription_date.strftime('%Y-%m-%d') }}
+                                        {% if prescription.diagnosis %}| Diagnosis: {{ prescription.diagnosis }}{% endif %}
+                                    </small>
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Dispensing Form -->
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h5><i class="fas fa-cash-register"></i> Dispensing Information</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-4">
+                                <div class="mb-3">
+                                    {{ form.payment_method.label(class="form-label") }}
+                                    {{ form.payment_method(class="form-select") }}
+                                    {% if form.payment_method.errors %}
+                                        <div class="invalid-feedback d-block">
+                                            {% for error in form.payment_method.errors %}
+                                                {{ error }}
+                                            {% endfor %}
+                                        </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="mb-3">
+                                    {{ form.discount_amount.label(class="form-label") }}
+                                    <div class="input-group">
+                                        <span class="input-group-text">₹</span>
+                                        {{ form.discount_amount(class="form-control", onchange="updateTotal()") }}
+                                    </div>
+                                    {% if form.discount_amount.errors %}
+                                        <div class="invalid-feedback d-block">
+                                            {% for error in form.discount_amount.errors %}
+                                                {{ error }}
+                                            {% endfor %}
+                                        </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="mb-3">
+                                    {{ form.tax_amount.label(class="form-label") }}
+                                    <div class="input-group">
+                                        <span class="input-group-text">₹</span>
+                                        {{ form.tax_amount(class="form-control", onchange="updateTotal()") }}
+                                    </div>
+                                    {% if form.tax_amount.errors %}
+                                        <div class="invalid-feedback d-block">
+                                            {% for error in form.tax_amount.errors %}
+                                                {{ error }}
+                                            {% endfor %}
+                                        </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-12">
+                                <div class="mb-3">
+                                    {{ form.notes.label(class="form-label") }}
+                                    {{ form.notes(class="form-control", rows="2", placeholder="Any additional notes...") }}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Prescription Items -->
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h5><i class="fas fa-pills"></i> Items to Dispense</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-bordered">
+                                <thead class="table-dark">
+                                    <tr>
+                                        <th>Medicine</th>
+                                        <th>Dosage & Instructions</th>
+                                        <th>Prescribed Qty</th>
+                                        <th>Available Stock</th>
+                                        <th>Dispense Qty</th>
+                                        <th>Unit Price</th>
+                                        <th>Total</th>
+                                        <th>Status</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for item in prescription.items %}
+                                    <tr data-item-id="{{ item.id }}" data-unit-price="{{ item.unit_price }}">
+                                        <td>
+                                            <div class="fw-bold">{{ item.medicine.name }}</div>
+                                            <small class="text-muted">{{ item.medicine.manufacturer }}</small>
+                                            <input type="hidden" name="item_ids[]" value="{{ item.id }}">
+                                        </td>
+                                        <td>
+                                            <div>{{ item.dosage or 'N/A' }} - {{ item.frequency or 'N/A' }}</div>
+                                            <small class="text-muted">
+                                                Duration: {{ item.duration_days or 'N/A' }} days<br>
+                                                Instructions: {{ item.instructions or 'N/A' }}
+                                            </small>
+                                        </td>
+                                        <td class="text-center">
+                                            <span class="badge bg-info">{{ item.quantity }}</span>
+                                        </td>
+                                        <td class="text-center">
+                                            {% if item.medicine.quantity >= item.quantity %}
+                                                <span class="badge bg-success">{{ item.medicine.quantity }}</span>
+                                            {% elif item.medicine.quantity > 0 %}
+                                                <span class="badge bg-warning">{{ item.medicine.quantity }}</span>
+                                            {% else %}
+                                                <span class="badge bg-danger">{{ item.medicine.quantity }}</span>
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            <input type="number" 
+                                                   class="form-control dispense-qty" 
+                                                   name="dispense_quantities[]"
+                                                   value="{{ item.quantity if item.medicine.quantity >= item.quantity else item.medicine.quantity }}"
+                                                   min="0" 
+                                                   max="{{ [item.quantity, item.medicine.quantity]|min }}"
+                                                   onchange="updateItemTotal(this)">
+                                        </td>
+                                        <td class="text-center">₹{{ "%.2f"|format(item.unit_price) }}</td>
+                                        <td class="text-center item-total">₹{{ "%.2f"|format(item.total_price) }}</td>
+                                        <td class="text-center">
+                                            {% if item.medicine.quantity >= item.quantity %}
+                                                <span class="badge bg-success">Available</span>
+                                            {% elif item.medicine.quantity > 0 %}
+                                                <span class="badge bg-warning">Partial</span>
+                                            {% else %}
+                                                <span class="badge bg-danger">Out of Stock</span>
+                                            {% endif %}
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Total Summary -->
+                <div class="card mb-4">
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-8">
+                                <h6>Dispensing Summary</h6>
+                                <p class="mb-0">
+                                    <small class="text-muted">
+                                        Review all items and quantities before proceeding with dispensing.
+                                        Stock will be updated automatically after successful dispensing.
+                                    </small>
+                                </p>
+                            </div>
+                            <div class="col-md-4 text-end">
+                                <table class="table table-sm table-borderless">
+                                    <tr>
+                                        <td>Subtotal:</td>
+                                        <td>₹<span id="subtotal">{{ "%.2f"|format(prescription.total_amount) }}</span></td>
+                                    </tr>
+                                    <tr>
+                                        <td>Discount:</td>
+                                        <td>₹<span id="discount">0.00</span></td>
+                                    </tr>
+                                    <tr>
+                                        <td>Tax:</td>
+                                        <td>₹<span id="tax">0.00</span></td>
+                                    </tr>
+                                    <tr class="border-top">
+                                        <td><strong>Total Amount:</strong></td>
+                                        <td><strong>₹<span id="finalTotal">{{ "%.2f"|format(prescription.total_amount) }}</span></strong></td>
+                                    </tr>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Submit Buttons -->
+                <div class="card">
+                    <div class="card-body text-end">
+                        <a href="{{ url_for('prescription_detail', id=prescription.id) }}" 
+                           class="btn btn-secondary me-2">Cancel</a>
+                        <button type="submit" class="btn btn-success">
+                            <i class="fas fa-pills"></i> Complete Dispensing
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+function updateItemTotal(input) {
+    const row = input.closest('tr');
+    const unitPrice = parseFloat(row.dataset.unitPrice);
+    const quantity = parseInt(input.value) || 0;
+    const total = unitPrice * quantity;
+    
+    row.querySelector('.item-total').textContent = '₹' + total.toFixed(2);
+    updateTotal();
+}
+
+function updateTotal() {
+    let subtotal = 0;
+    
+    // Calculate subtotal from all items
+    document.querySelectorAll('.dispense-qty').forEach(input => {
+        const row = input.closest('tr');
+        const unitPrice = parseFloat(row.dataset.unitPrice);
+        const quantity = parseInt(input.value) || 0;
+        subtotal += unitPrice * quantity;
+    });
+    
+    // Get discount and tax values
+    const discount = parseFloat(document.querySelector('input[name="discount_amount"]').value) || 0;
+    const tax = parseFloat(document.querySelector('input[name="tax_amount"]').value) || 0;
+    
+    // Calculate final total
+    const finalTotal = subtotal - discount + tax;
+    
+    // Update display
+    document.getElementById('subtotal').textContent = subtotal.toFixed(2);
+    document.getElementById('discount').textContent = discount.toFixed(2);
+    document.getElementById('tax').textContent = tax.toFixed(2);
+    document.getElementById('finalTotal').textContent = finalTotal.toFixed(2);
+}
+
+// Initialize totals on page load
+document.addEventListener('DOMContentLoaded', function() {
+    updateTotal();
+    
+    // Add change listeners to all dispense quantity inputs
+    document.querySelectorAll('.dispense-qty').forEach(input => {
+        input.addEventListener('change', function() {
+            updateItemTotal(this);
+        });
+    });
+});
+</script>
+{% endblock %}

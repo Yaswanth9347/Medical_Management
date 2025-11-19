@@ -1,55 +1,101 @@
 {% extends "base.html" %}
 
 {% block content %}
-<h2>Medicine Inventory</h2>
-<div class="row mb-3">
-    <div class="col-md-4">
-        <a href="{{ url_for('add_medicine') }}" class="btn btn-primary btn-lg">Add Medicine</a>
+<div class="page-header">
+    <div>
+        <h1 class="page-title">Inventory</h1>
+        <p class="page-subtitle">Monitor batches, expiry timelines, and stock velocity.</p>
     </div>
-    <div class="col-md-8">
-        <form class="d-flex">
-            <input class="form-control me-2" type="search" placeholder="Search by name" aria-label="Search" name="query" value="{{ query or '' }}">
-            <input class="form-control me-2" type="text" placeholder="Category" name="category" value="{{ category or '' }}">
-            <input class="form-control me-2" type="text" placeholder="Batch Number" name="batch_number" value="{{ batch_number or '' }}">
-            <input class="form-control me-2" type="date" name="start_date">
-            <input class="form-control me-2" type="date" name="end_date">
-            <button class="btn btn-outline-success" type="submit">Search</button>
-        </form>
+    <div class="page-actions">
+        <a href="{{ url_for('download_report', report_type='inventory') }}" class="btn btn-outline-primary btn-pill">
+            <i class="fa-solid fa-file-arrow-down me-2"></i> Export
+        </a>
+        <a href="{{ url_for('add_medicine') }}" class="btn btn-primary btn-pill">
+            <i class="fa-solid fa-plus me-2"></i> Add Medicine
+        </a>
     </div>
 </div>
 
-<table class="table table-striped">
-    <thead>
-        <tr>
-            <th>Name</th>
-            <th>Batch Number</th>
-            <th>Category</th>
-            <th>GST Percent</th>
-            <th>Expiry Date</th>
-            <th>Quantity</th>
-            <th>Price</th>
-            <th>Stock Status</th>
-            <th>Actions</th>
-        </tr>
-    </thead>
-    <tbody>
-        {% for medicine in medicines %}
-        <tr class="{{ 'table-danger' if medicine.is_expired }}">
-            <td>{{ medicine.name }}</td>
-            <td>{{ medicine.batch_number }}</td>
-            <td>{{ medicine.category }}</td>
-            <td>{{ medicine.gst_percent }}</td>
-            <td>{{ medicine.expiry_date.strftime('%Y-%m-%d') }}</td>
-            <td>{{ medicine.quantity }}</td>
-            <td>{{ medicine.price }}</td>
-            <td>{{ medicine.stock_status }}</td>
-            <td>
-                <a href="{{ url_for('edit_medicine', id=medicine.id) }}" class="btn btn-warning">Edit</a>
-                <a href="{{ url_for('delete_medicine', id=medicine.id) }}" class="btn btn-danger">Delete</a>
-            </td>
-        </tr>
-        {% endfor %}
-    </tbody>
-</table>
-<a href="{{ url_for('download_report', report_type='inventory') }}" class="btn btn-success">Export to Excel</a>
+<div class="card-surface mb-4">
+    <form class="row g-3 align-items-end">
+        <div class="col-md-3">
+            <label class="form-label">Name</label>
+            <input class="form-control" type="text" placeholder="Search by name" name="query" value="{{ query or '' }}">
+        </div>
+        <div class="col-md-2">
+            <label class="form-label">Category</label>
+            <input class="form-control" type="text" placeholder="e.g. Tablets" name="category" value="{{ category or '' }}">
+        </div>
+        <div class="col-md-2">
+            <label class="form-label">Batch</label>
+            <input class="form-control" type="text" placeholder="Batch #" name="batch_number" value="{{ batch_number or '' }}">
+        </div>
+        <div class="col-md-2">
+            <label class="form-label">Expiry from</label>
+            <input class="form-control" type="date" name="start_date" value="{{ request.args.get('start_date','') }}">
+        </div>
+        <div class="col-md-2">
+            <label class="form-label">Expiry to</label>
+            <input class="form-control" type="date" name="end_date" value="{{ request.args.get('end_date','') }}">
+        </div>
+        <div class="col-md-1 d-grid">
+            <button class="btn btn-primary" type="submit">Filter</button>
+        </div>
+    </form>
+</div>
+
+<div class="table-responsive">
+    <table class="table-modern">
+        <thead>
+            <tr>
+                <th>Medicine</th>
+                <th>Batch</th>
+                <th>Category</th>
+                <th>GST %</th>
+                <th>Expiry</th>
+                <th>Qty</th>
+                <th>Price</th>
+                <th>Status</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for medicine in medicines %}
+            <tr class="{{ 'bg-opacity-25 bg-danger' if medicine.is_expired }}">
+                <td>
+                    <div class="fw-semibold">{{ medicine.name }}</div>
+                    <small class="text-muted">Added {{ medicine.created_at.strftime('%Y-%m-%d') if medicine.created_at else '' }}</small>
+                </td>
+                <td>{{ medicine.batch_number }}</td>
+                <td>{{ medicine.category }}</td>
+                <td>{{ medicine.gst_percent }}%</td>
+                <td>{{ medicine.expiry_date.strftime('%Y-%m-%d') }}</td>
+                <td>{{ medicine.quantity }}</td>
+                <td>₹{{ '%.2f'|format(medicine.price) }}</td>
+                <td>
+                    {% if medicine.is_expired %}
+                        <span class="badge-soft danger">Expired</span>
+                    {% elif medicine.stock_status == 'Low' %}
+                        <span class="badge-soft warning">Low Stock</span>
+                    {% elif medicine.stock_status == 'Out of Stock' %}
+                        <span class="badge-soft danger">Out</span>
+                    {% else %}
+                        <span class="badge-soft success">In Stock</span>
+                    {% endif %}
+                </td>
+                <td class="text-end">
+                    <div class="btn-group">
+                        <a href="{{ url_for('edit_medicine', id=medicine.id) }}" class="btn btn-sm btn-outline-primary">Edit</a>
+                        <a href="{{ url_for('delete_medicine', id=medicine.id) }}" class="btn btn-sm btn-outline-danger">Delete</a>
+                    </div>
+                </td>
+            </tr>
+            {% else %}
+            <tr>
+                <td colspan="9" class="text-center text-muted py-5">No medicines match your filters.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
 {% endblock %}

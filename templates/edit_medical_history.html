@@ -1,0 +1,188 @@
+{% extends "base.html" %}
+{% block content %}
+    <div class="content-section">
+        <h2>Edit Medical History - {{ patient.full_name }}</h2>
+        <a href="{{ url_for('patient_profile', patient_id=patient.id) }}" class="btn btn-secondary mb-3">← Back to Patient Profile</a>
+        
+        <form method="POST">
+            {{ form.hidden_tag() }}
+            
+            <!-- Visit Information Section -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5>Visit Information</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group mb-3">
+                                {{ form.visit_date.label(class="form-label") }}
+                                {{ form.visit_date(class="form-control") }}
+                                {% if form.visit_date.errors %}
+                                    <div class="text-danger">
+                                        {% for error in form.visit_date.errors %}
+                                            <small>{{ error }}</small>
+                                        {% endfor %}
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group mb-3">
+                                {{ form.doctor_name.label(class="form-label") }}
+                                {{ form.doctor_name(class="form-control") }}
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group mb-3">
+                        {{ form.chief_complaint.label(class="form-label") }}
+                        {{ form.chief_complaint(class="form-control", rows="3") }}
+                        <small class="form-text text-muted">Main reason for the visit</small>
+                    </div>
+                    
+                    <div class="form-group mb-3">
+                        {{ form.symptoms.label(class="form-label") }}
+                        {{ form.symptoms(class="form-control", rows="3") }}
+                        <small class="form-text text-muted">Describe symptoms experienced</small>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Vital Signs Section -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5>Vital Signs</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div class="form-group mb-3">
+                                {{ form.temperature.label(class="form-label") }}
+                                {{ form.temperature(class="form-control", placeholder="98.6") }}
+                                {% if form.temperature.errors %}
+                                    <div class="text-danger">
+                                        {% for error in form.temperature.errors %}
+                                            <small>{{ error }}</small>
+                                        {% endfor %}
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-group mb-3">
+                                {{ form.heart_rate.label(class="form-label") }}
+                                {{ form.heart_rate(class="form-control", placeholder="72") }}
+                                {% if form.heart_rate.errors %}
+                                    <div class="text-danger">
+                                        {% for error in form.heart_rate.errors %}
+                                            <small>{{ error }}</small>
+                                        {% endfor %}
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-group mb-3">
+                                {{ form.follow_up_date.label(class="form-label") }}
+                                {{ form.follow_up_date(class="form-control") }}
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-3">
+                            <div class="form-group mb-3">
+                                {{ form.blood_pressure_systolic.label(class="form-label") }}
+                                {{ form.blood_pressure_systolic(class="form-control", placeholder="120") }}
+                                {% if form.blood_pressure_systolic.errors %}
+                                    <div class="text-danger">
+                                        {% for error in form.blood_pressure_systolic.errors %}
+                                            <small>{{ error }}</small>
+                                        {% endfor %}
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="form-group mb-3">
+                                {{ form.blood_pressure_diastolic.label(class="form-label") }}
+                                {{ form.blood_pressure_diastolic(class="form-control", placeholder="80") }}
+                                {% if form.blood_pressure_diastolic.errors %}
+                                    <div class="text-danger">
+                                        {% for error in form.blood_pressure_diastolic.errors %}
+                                            <small>{{ error }}</small>
+                                        {% endfor %}
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="form-group mb-3">
+                                {{ form.weight.label(class="form-label") }}
+                                {{ form.weight(class="form-control", placeholder="70.0") }}
+                                {% if form.weight.errors %}
+                                    <div class="text-danger">
+                                        {% for error in form.weight.errors %}
+                                            <small>{{ error }}</small>
+                                        {% endfor %}
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-group mb-3">
+                                {{ form.height.label(class="form-label") }}
+                                {{ form.height(class="form-control", placeholder="170.0") }}
+                                {% if form.height.errors %}
+                                    <div class="text-danger">
+                                        {% for error in form.height.errors %}
+                                            <small>{{ error }}</small>
+                                        {% endfor %}
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Clinical Information Section -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5>Clinical Information</h5>
+                </div>
+                <div class="card-body">
+                    <div class="form-group mb-3">
+                        {{ form.diagnosis.label(class="form-label") }}
+                        {{ form.diagnosis(class="form-control", rows="3") }}
+                        <small class="form-text text-muted">Medical diagnosis or assessment</small>
+                    </div>
+                    
+                    <div class="form-group mb-3">
+                        {{ form.treatment.label(class="form-label") }}
+                        {{ form.treatment(class="form-control", rows="3") }}
+                        <small class="form-text text-muted">Treatment provided or recommended</small>
+                    </div>
+                    
+                    <div class="form-group mb-3">
+                        {{ form.prescription.label(class="form-label") }}
+                        {{ form.prescription(class="form-control", rows="3") }}
+                        <small class="form-text text-muted">Medications prescribed</small>
+                    </div>
+                    
+                    <div class="form-group mb-3">
+                        {{ form.notes.label(class="form-label") }}
+                        {{ form.notes(class="form-control", rows="4") }}
+                        <small class="form-text text-muted">Additional notes or observations</small>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="form-group">
+                {{ form.submit(class="btn btn-primary") }}
+                <a href="{{ url_for('patient_profile', patient_id=patient.id) }}" class="btn btn-secondary">Cancel</a>
+            </div>
+        </form>
+    </div>
+{% endblock content %}

@@ -1,4 +1,4 @@
-# Use Python 3.9 slim image as base
+# Alternative Dockerfile for better compatibility
 FROM python:3.9-slim
 
 # Set environment variables
@@ -10,17 +10,11 @@ ENV FLASK_ENV=production
 # Set work directory
 WORKDIR /app
 
-# Install system dependencies (fixed package names for compatibility)
+# Install minimal system dependencies
 RUN apt-get update \
     && apt-get install -y --no-install-recommends \
-        build-essential \
-        libpango-1.0-0 \
-        libpangoft2-1.0-0 \
-        libfontconfig1 \
-        libcairo2 \
-        libgdk-pixbuf-xlib-2.0-0 \
-        libffi-dev \
-        shared-mime-info \
+        gcc \
+        libc6-dev \
         curl \
     && rm -rf /var/lib/apt/lists/*
 
@@ -31,7 +25,7 @@ COPY requirements.txt .
 RUN pip install --no-cache-dir --upgrade pip \
     && pip install --no-cache-dir -r requirements.txt
 
-# Copy project files
+# Copy application code
 COPY . .
 
 # Create necessary directories
@@ -46,8 +40,8 @@ USER appuser
 EXPOSE 5000
 
 # Health check
-HEALTHCHECK --interval=30s --timeout=30s --start-period=5s --retries=3 \
+HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
     CMD curl -f http://localhost:5000/ || exit 1
 
-# Run the application with gunicorn
-CMD ["gunicorn", "--bind", "0.0.0.0:5000", "--workers", "4", "--timeout", "120", "wsgi:app"]
+# Run the application
+CMD ["python", "wsgi.py"]

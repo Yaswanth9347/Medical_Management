@@ -16,13 +16,30 @@ Usage:
 """
 
 import os
-from app import app
-from config import get_config
+import sys
+from werkzeug.security import generate_password_hash
+
+# Add the current directory to the Python path
+sys.path.insert(0, os.path.dirname(__file__))
+
+from app import app, create_default_admin
+from models import User
 
 # Set production configuration if environment is production
-if os.environ.get('FLASK_ENV') == 'production':
-    config = get_config('production')
-    app.config.from_object(config)
+config_name = os.environ.get('FLASK_ENV', 'development')
+
+# Initialize database and create default admin user for production
+with app.app_context():
+    try:
+        # Create all database tables
+        from models import db
+        db.create_all()
+        
+        # Create default admin user
+        create_default_admin()
+            
+    except Exception as e:
+        print(f"❌ Database initialization error: {e}")
 
 # WSGI application object
 application = app
@@ -31,11 +48,12 @@ if __name__ == "__main__":
     # For direct execution (not recommended for production)
     port = int(os.environ.get('PORT', 5000))
     host = os.environ.get('HOST', '0.0.0.0')
-    debug = os.environ.get('FLASK_ENV') == 'development'
+    debug = config_name == 'development'
     
-    print(f"Starting Medical Management System on {host}:{port}")
-    print(f"Environment: {os.environ.get('FLASK_ENV', 'development')}")
-    print(f"Debug mode: {debug}")
+    print(f"🚀 Starting Medical Management System")
+    print(f"   Environment: {config_name}")
+    print(f"   Host: {host}:{port}")
+    print(f"   Debug mode: {debug}")
     
     app.run(
         host=host,

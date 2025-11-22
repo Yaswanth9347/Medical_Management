@@ -66,21 +66,28 @@ class DevelopmentConfig(Config):
     SESSION_COOKIE_SECURE = False
 
 class ProductionConfig(Config):
-    """Production environment configuration."""
-    
+    """Production environment configuration.
+
+    In production we REQUIRE a DATABASE_URL environment variable. We do not fall back
+    to a local SQLite file to avoid accidental ephemeral data loss on stateless
+    platforms (e.g., Railway, Render, Heroku). The URL is normalized to the
+    'postgresql://' prefix if necessary.
+    """
+
     DEBUG = False
     SQLALCHEMY_ECHO = False
     TESTING = False
-    
+
     # Production security settings
     SESSION_COOKIE_SECURE = True
     PREFERRED_URL_SCHEME = 'https'
-    
-    # Production database (PostgreSQL recommended)
-    if os.environ.get('DATABASE_URL'):
-        SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL')
-        if SQLALCHEMY_DATABASE_URI.startswith('postgres://'):
-            SQLALCHEMY_DATABASE_URI = SQLALCHEMY_DATABASE_URI.replace('postgres://', 'postgresql://', 1)
+
+    _db_url = os.environ.get('DATABASE_URL')
+    if not _db_url:
+        raise RuntimeError("DATABASE_URL must be set for production environment")
+    if _db_url.startswith('postgres://'):
+        _db_url = _db_url.replace('postgres://', 'postgresql://', 1)
+    SQLALCHEMY_DATABASE_URI = _db_url
 
 class TestingConfig(Config):
     """Testing environment configuration."""

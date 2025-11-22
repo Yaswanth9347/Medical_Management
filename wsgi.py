@@ -23,30 +23,37 @@ from werkzeug.security import generate_password_hash
 sys.path.insert(0, os.path.dirname(__file__))
 
 from app import app, create_default_admin
-from models import User
+from models import User, db
+from alembic import command as alembic_command
+from alembic.config import Config as AlembicConfig
 
 # Set production configuration if environment is production
 config_name = os.environ.get('FLASK_ENV', 'development')
 
-# Initialize database and create default admin user for production
+# Run migrations (optional) and ensure default admin exists
 with app.app_context():
     try:
-        # Create all database tables
-        from models import db
-        db.create_all()
-        
-        # Create default admin user
+        if os.environ.get('RUN_MIGRATIONS', '1') == '1':
+            # Alembic migration upgrade to head
+            alembic_ini_path = os.path.join(os.path.dirname(__file__), 'migrations', 'alembic.ini')
+            if os.path.exists(alembic_ini_path):
+                alembic_cfg = AlembicConfig(alembic_ini_path)
+                alembic_command.upgrade(alembic_cfg, 'head')
+                print("✅ Alembic migrations applied")
+            else:
+                print("⚠️ Alembic config not found; skipping migrations")
+
+        # Create default admin (does NOT create tables; assumes migrations applied)
         create_default_admin()
-            
     except Exception as e:
-        print(f"❌ Database initialization error: {e}")
+        print(f"❌ Startup initialization error: {e}")
 
 # WSGI application object
 application = app
 
 if __name__ == "__main__":
     # For direct execution (not recommended for production)
-    port = int(os.environ.get('PORT', 5000))
+    port = int(os.environ.get('PORT', 8080))
     host = os.environ.get('HOST', '0.0.0.0')
     debug = config_name == 'development'
     

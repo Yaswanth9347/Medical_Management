@@ -140,11 +140,18 @@ migrate = Migrate(app, db)
 
 # Create tables based on models
 def create_db():
-    """Create all database tables and default admin user."""
+    """Development helper: create tables (dev only) + default admin.
+
+    In production we rely on Alembic migrations (see wsgi.py). This function
+    is retained for local development convenience only.
+    """
     with app.app_context():
-        db.create_all()
+        env = os.environ.get('FLASK_ENV', 'development')
+        if env == 'development':
+            db.create_all()
+            print("(Dev) Tables created via create_db()")
         create_default_admin()
-        print("Database tables created successfully!")
+        print("Default admin ensured.")
 
 def create_default_admin():
     """Create default admin user if it doesn't exist."""
@@ -1418,24 +1425,55 @@ def download_report(report_type):
 @app.route('/backup')
 @login_required
 def backup():
+    """Engine-aware backup.
+
+    - PostgreSQL: pg_dump custom format
+    - SQLite: copy database file
+    - Other engines: disabled
+    """
+    from sqlalchemy import inspect
+    engine = db.get_engine()
+    driver = engine.url.drivername
+    backup_file = 'backup.dump'
     try:
-        # Replace with your actual database credentials and name
-        db_user = os.getenv('DB_USER')
-        db_password = os.getenv('DB_PASSWORD')
-        db_name = os.getenv('DB_NAME')
-        backup_file = 'backup.sql'
-
-        command = f"mysqldump -u {db_user} -p{db_password} {db_name} > {backup_file}"
-        subprocess.run(command, shell=True, check=True)
-
+        if driver.startswith('postgresql'):
+            # Ensure pg_dump exists
+            result = subprocess.run(['which', 'pg_dump'], capture_output=True, text=True)
+            if result.returncode != 0:
+                flash('pg_dump not available in container; cannot backup PostgreSQL.', 'danger')
+                return redirect(url_for('dashboard'))
+            env = os.environ.copy()
+            if engine.url.password:
+                env['PGPASSWORD'] = engine.url.password
+            cmd = [
+                'pg_dump', '-h', engine.url.host or 'localhost', '-U', engine.url.username,
+                '-d', engine.url.database, '-F', 'c', '-f', backup_file
+            ]
+            subprocess.run(cmd, check=True, env=env)
+        elif driver.startswith('sqlite'):
+            db_path = engine.url.database
+            if not db_path or not os.path.exists(db_path):
+                flash('SQLite database file not found.', 'danger')
+                return redirect(url_for('dashboard'))
+            import shutil
+            shutil.copy2(db_path, backup_file)
+        else:
+            flash(f'Backup not implemented for engine: {driver}', 'warning')
+            return redirect(url_for('dashboard'))
         return send_file(backup_file, as_attachment=True)
     except Exception as e:
-        flash(f"Error creating backup: {e}", "danger")
+        flash(f"Error creating backup: {e}", 'danger')
         return redirect(url_for('dashboard'))
 
 @app.route('/restore', methods=['POST'])
 @login_required
 def restore():
+    """Engine-aware restore.
+
+    WARNING: Restoring will overwrite current data.
+    - PostgreSQL: uses pg_restore for custom format dump
+    - SQLite: replaces database file
+    """
     if 'backup_file' not in request.files:
         flash('No file part', 'danger')
         return redirect(url_for('dashboard'))
@@ -1443,27 +1481,39 @@ def restore():
     if file.filename == '':
         flash('No selected file', 'danger')
         return redirect(url_for('dashboard'))
-    if file:
-        try:
-            filename = secure_filename(file.filename)
-            filepath = os.path.join('/tmp', filename)
-            file.save(filepath)
-
-            # Replace with your actual database credentials and name
-            db_user = os.getenv('DB_USER')
-            db_password = os.getenv('DB_PASSWORD')
-            db_name = os.getenv('DB_NAME')
-
-            command = f"mysql -u {db_user} -p{db_password} {db_name} < {filepath}"
-            subprocess.run(command, shell=True, check=True)
-
-            flash('Database restored successfully!', 'success')
-        except Exception as e:
-            flash(f"Error restoring database: {e}", "danger")
-        finally:
-            if os.path.exists(filepath):
-                os.remove(filepath)
-        return redirect(url_for('dashboard'))
+    engine = db.get_engine()
+    driver = engine.url.drivername
+    try:
+        filename = secure_filename(file.filename)
+        temp_path = os.path.join('/tmp', filename)
+        file.save(temp_path)
+        if driver.startswith('postgresql'):
+            result = subprocess.run(['which', 'pg_restore'], capture_output=True, text=True)
+            if result.returncode != 0:
+                flash('pg_restore not available; cannot restore PostgreSQL.', 'danger')
+                return redirect(url_for('dashboard'))
+            env = os.environ.copy()
+            if engine.url.password:
+                env['PGPASSWORD'] = engine.url.password
+            cmd = [
+                'pg_restore', '-h', engine.url.host or 'localhost', '-U', engine.url.username,
+                '-d', engine.url.database, '-c', temp_path
+            ]
+            subprocess.run(cmd, check=True, env=env)
+        elif driver.startswith('sqlite'):
+            db_path = engine.url.database
+            import shutil
+            shutil.copy2(temp_path, db_path)
+        else:
+            flash(f'Restore not implemented for engine: {driver}', 'warning')
+            return redirect(url_for('dashboard'))
+        flash('Database restored successfully!', 'success')
+    except Exception as e:
+        flash(f"Error restoring database: {e}", 'danger')
+    finally:
+        if os.path.exists(temp_path):
+            os.remove(temp_path)
+    return redirect(url_for('dashboard'))
 
 def admin_required(f):
     @wraps(f)
@@ -1670,10 +1720,9 @@ def internal_error(error):
     return "Something went wrong.", 500
 
 if __name__ == '__main__':
+    # Development direct run: optionally create tables
     with app.app_context():
         create_db()
-    
-    # Railway deployment configuration - MUST use Railway's PORT
     port = int(os.environ.get("PORT", 8080))
-    print(f"\n🚀 App starting on port: {port}\n")
-    app.run(host="0.0.0.0", port=port, debug=False)
+    print(f"\n🚀 Dev app starting on port: {port}\n")
+    app.run(host="0.0.0.0", port=port, debug=(os.environ.get('FLASK_ENV','development')=='development'))

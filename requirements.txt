@@ -27,6 +27,9 @@ openpyxl==3.1.2
 # Production Server
 gunicorn==21.2.0
 
+# PostgreSQL Driver
+psycopg2-binary==2.9.9
+
 # Additional Flask dependencies
 Jinja2==3.1.2
 MarkupSafe==2.1.3
